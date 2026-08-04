@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GRM · Assessoria de vendas para construtoras Minha Casa Minha Vida</title>
+<meta name="description" content="A GRM cria estrutura digital para construtoras MCMV venderem mais pela internet. Tráfego, qualificação, corretagem com CRECI e sistema próprio.">
+<meta name="theme-color" content="#0B0F0D">
+<meta property="og:title" content="GRM · Estrutura digital para construtoras MCMV">
+<meta property="og:description" content="R$ 2 mil em anúncio viram 10 casas vendidas por mês. Veja a conta aberta.">
+<meta property="og:type" content="website">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   TOKENS — paleta única, três níveis de verde para hierarquia
+   ============================================================ */
+:root{
+  --concreto:     #0B0F0D;
+  --concreto-2:   #111815;
+  --argamassa:    #1E2A24;
+
+  --verde:        #3FD07E;   /* nível 2 — H2, ações */
+  --verde-claro:  #8CF5B8;   /* nível 3 — números e grifos do preço */
+  --verde-fundo:  #12261D;
+  --verde-forte:  #17703F;
+
+  --branco:       #F4F6F3;   /* tarja de topo */
+  --cal:          #E9F0EB;   /* nível 1 — H1 */
+  --cal-fraca:    #8CA096;
+
+  --display:'Bricolage Grotesque', system-ui, sans-serif;
+  --corpo:'Inter', system-ui, sans-serif;
+  --dado:'JetBrains Mono', ui-monospace, monospace;
+
+  --topo:46px; --raio:14px; --max:680px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{background:var(--concreto);color:var(--cal);font-family:var(--corpo);font-size:16px;line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+button,input{font-family:inherit;font-size:inherit;color:inherit}
+
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(var(--argamassa) 1px,transparent 1px),linear-gradient(90deg,var(--argamassa) 1px,transparent 1px);
+  background-size:48px 24px;opacity:.15;
+  mask-image:radial-gradient(ellipse 80% 55% at 50% 0%,#000 0%,transparent 72%);
+  -webkit-mask-image:radial-gradient(ellipse 80% 55% at 50% 0%,#000 0%,transparent 72%);
+}
+
+/* ============================================================
+   TARJA BRANCA + FIADA DE PROGRESSO
+   ============================================================ */
+.tarja{
+  position:fixed;top:0;left:0;right:0;z-index:60;
+  background:var(--branco);color:#0B0F0D;
+  padding:8px 16px 12px;text-align:center;
+  box-shadow:0 2px 20px rgba(0,0,0,.5);
+}
+.tarja p{font-size:10.5px;line-height:1.35;color:#3C4B43;letter-spacing:.01em}
+.tarja b{color:var(--verde-forte);font-weight:600}
+.tarja span{display:block;opacity:.65;font-size:9.5px;margin-top:2px}
+.fiada{position:absolute;left:0;right:0;bottom:0;height:4px;display:flex;gap:2px;padding:0 2px}
+.fiada i{flex:1;background:#D3DCD6;border-radius:1px;transform:scaleY(.5);transform-origin:bottom;transition:transform .28s ease,background .28s ease}
+.fiada i.set{background:var(--verde-forte);transform:scaleY(1)}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.wrap{max-width:var(--max);margin:0 auto;padding:0 20px;position:relative;z-index:1}
+section{padding:60px 0;position:relative;z-index:1}
+#hero{padding-top:calc(var(--topo) + 46px);padding-bottom:44px}
+
+.eyebrow{font-family:var(--dado);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--verde);display:inline-flex;align-items:center;gap:8px;margin-bottom:14px}
+.eyebrow::before{content:'';width:14px;height:8px;background:var(--verde);border-radius:1.5px;opacity:.85}
+
+/* HIERARQUIA DE COR — três níveis distintos */
+h1{font-family:var(--display);font-size:clamp(31px,8.4vw,47px);line-height:1.05;font-weight:800;letter-spacing:-.034em;color:var(--cal)}
+h2{font-family:var(--display);font-size:clamp(24px,6.3vw,34px);line-height:1.12;font-weight:800;letter-spacing:-.028em;margin-bottom:14px;color:var(--verde)}
+h3{font-family:var(--display);font-size:17px;font-weight:600;letter-spacing:-.015em;color:var(--cal)}
+.lead{color:var(--cal-fraca);font-size:16.5px;line-height:1.62}
+.mono{font-family:var(--dado)}
+
+/* grifo animado */
+.grifo{position:relative;z-index:1;padding:0 .14em;color:var(--cal);white-space:nowrap}
+.grifo::before{content:'';position:absolute;left:0;top:.06em;bottom:.06em;width:0;background:var(--verde-forte);border-radius:3px;z-index:-1;transition:width .85s cubic-bezier(.2,.8,.3,1) .35s}
+.in .grifo::before{width:100%}
+.grifo-claro::before{background:var(--verde)}
+.grifo-claro{color:#06170F}
+
+/* ============================================================
+   BOTÕES
+   ============================================================ */
+.cta{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:17px 22px;margin-top:24px;
+  background:var(--verde);color:#06170F;font-family:var(--display);font-weight:800;font-size:16.5px;letter-spacing:-.012em;
+  border:none;border-radius:var(--raio);cursor:pointer;text-decoration:none;position:relative;overflow:hidden;
+  box-shadow:0 8px 26px -12px rgba(63,208,126,.85);transition:transform .16s ease}
+.cta:active{transform:scale(.975)}
+.cta::after{content:'';position:absolute;top:0;left:-60%;width:45%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.42),transparent);animation:brilho 3.6s ease-in-out infinite}
+@keyframes brilho{0%,58%{left:-60%}88%,100%{left:130%}}
+.cta svg{width:17px;height:17px;flex:none}
+
+.rev{opacity:0;transform:translateY(26px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.8,.3,1)}
+.rev.in{opacity:1;transform:none}
+
+.conector{height:54px;display:grid;place-items:center;position:relative;z-index:1}
+.conector::before{content:'';position:absolute;top:0;bottom:0;width:1px;background:repeating-linear-gradient(var(--argamassa) 0 5px,transparent 5px 11px)}
+.conector i{width:13px;height:8px;background:var(--verde);border-radius:2px;animation:cai 2.1s cubic-bezier(.5,0,.5,1) infinite;box-shadow:0 0 14px rgba(63,208,126,.5)}
+@keyframes cai{0%{transform:translateY(-20px);opacity:0}30%{opacity:1}70%{transform:translateY(18px);opacity:1}100%{transform:translateY(22px);opacity:0}}
+
+/* ============================================================
+   CONTA ABERTA
+   ============================================================ */
+.conta{display:grid;gap:9px;margin-top:22px}
+.linha{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:15px 17px;border-radius:11px;background:var(--concreto-2);border:1px solid var(--argamassa);border-left:3px solid var(--argamassa)}
+.linha.saida{border-left-color:#3A403C}
+.linha.entrada{border-left-color:var(--verde)}
+.linha.lucro{background:var(--verde-fundo);border-color:#2C4A3B;border-left-color:var(--verde-claro)}
+.linha-rot{font-size:13.5px;color:var(--cal-fraca);line-height:1.35}
+.linha-rot small{display:block;opacity:.62;font-size:11.5px;margin-top:2px}
+.linha-val{font-family:var(--dado);font-weight:700;font-size:18px;white-space:nowrap}
+.linha.entrada .linha-val{color:var(--verde)}
+.linha.lucro .linha-val{color:var(--verde-claro);font-size:21px}
+.grupo{font-family:var(--dado);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--cal-fraca);margin:15px 0 -1px;opacity:.72}
+.legenda{font-size:12px;color:var(--cal-fraca);line-height:1.55;margin-top:16px;opacity:.85}
+.multiplica{margin-top:9px;padding:14px 17px;border-radius:11px;border:1px dashed #2C4A3B;background:rgba(63,208,126,.05);display:flex;justify-content:space-between;align-items:center;gap:12px}
+.multiplica span{font-size:12.5px;color:var(--cal-fraca)}
+.multiplica b{font-family:var(--dado);font-size:16px;color:var(--verde-claro);white-space:nowrap}
+
+/* ============================================================
+   FRENTES — acordeão
+   ============================================================ */
+.frentes{display:grid;gap:10px;margin-top:22px}
+.frente{background:var(--concreto-2);border:1px solid var(--argamassa);border-radius:var(--raio);overflow:hidden;transition:border-color .25s ease}
+.frente[open]{border-color:#2C4A3B}
+.frente summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:18px 44px 18px 18px;position:relative}
+.frente summary::-webkit-details-marker{display:none}
+.frente summary::after{content:'';position:absolute;right:18px;top:50%;width:10px;height:10px;margin-top:-7px;border-right:2px solid var(--verde);border-bottom:2px solid var(--verde);transform:rotate(45deg);transition:transform .3s ease}
+.frente[open] summary::after{transform:rotate(-135deg);margin-top:-3px}
+.frente-num{font-family:var(--dado);font-size:11px;font-weight:700;color:var(--verde);background:var(--verde-fundo);border:1px solid #2C4A3B;padding:5px 9px;border-radius:6px;flex:none}
+.frente-corpo{padding:0 18px 20px;animation:abre .35s ease}
+.fab{display:grid;gap:12px;border-top:1px solid var(--argamassa);padding-top:16px}
+.fab div{padding-left:13px;border-left:2px solid var(--argamassa)}
+.fab div:last-child{border-left-color:var(--verde)}
+.fab dt{font-family:var(--dado);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--cal-fraca);margin-bottom:3px}
+.fab dd{font-size:14.5px;line-height:1.55}
+.fab div:last-child dd{color:var(--verde)}
+@keyframes abre{from{opacity:0;transform:translateY(-7px)}to{opacity:1;transform:none}}
+
+/* ============================================================
+   PREÇO — faixa com tratamento próprio
+   ============================================================ */
+.faixa-preco{background:linear-gradient(180deg,transparent,rgba(18,38,29,.55) 22%,rgba(18,38,29,.55) 78%,transparent);border-block:1px solid var(--argamassa)}
+.preco{display:grid;gap:9px;margin-top:20px}
+.preco-item{padding:15px 17px;border-radius:11px;background:var(--concreto-2);border:1px solid var(--argamassa);transition:border-color .25s ease}
+.preco-item.var{background:rgba(63,208,126,.05);border-color:#24463A}
+.preco-cab{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.preco-cab b{font-size:14.5px;font-weight:600;color:var(--cal)}
+.preco-cab span{font-family:var(--dado);font-weight:700;font-size:17px;color:var(--verde);white-space:nowrap}
+.preco-item.var .preco-cab span{color:var(--verde-claro);font-size:20px}
+.preco-item small{display:block;font-size:12.5px;color:var(--cal-fraca);margin-top:4px;line-height:1.45}
+.selo-zero{display:inline-block;font-family:var(--dado);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--verde-claro);border:1px solid #2C4A3B;border-radius:5px;padding:3px 7px;margin-top:9px}
+.destaque{margin-top:20px;padding:22px 20px;border-radius:var(--raio);background:var(--verde);color:#06170F;text-align:center}
+.destaque b{font-family:var(--display);font-size:22px;font-weight:800;display:block;line-height:1.15;margin-bottom:9px;letter-spacing:-.02em}
+.destaque p{font-size:13.5px;color:#0F3A24;font-weight:500}
+.destaque p u{text-decoration:none;background:rgba(255,255,255,.55);border-radius:3px;padding:1px 5px;font-weight:700}
+
+/* ============================================================
+   FAQ
+   ============================================================ */
+.faq{margin-top:20px;border-top:1px solid var(--argamassa)}
+.faq details{border-bottom:1px solid var(--argamassa)}
+.faq summary{list-style:none;cursor:pointer;padding:19px 34px 19px 0;position:relative;font-family:var(--display);font-size:16px;font-weight:600;line-height:1.35;letter-spacing:-.012em;color:var(--cal)}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:'';position:absolute;right:4px;top:24px;width:11px;height:11px;border-right:2px solid var(--verde);border-bottom:2px solid var(--verde);transform:rotate(45deg);transition:transform .28s ease}
+.faq details[open] summary::after{transform:rotate(-135deg)}
+.faq p{padding:0 0 20px;font-size:14.5px;color:var(--cal-fraca);line-height:1.62;animation:abre .35s ease}
+
+/* ============================================================
+   CASOS DE SUCESSO
+   ============================================================ */
+.empresa{font-family:var(--display);font-weight:800;letter-spacing:-.01em;color:var(--cal)}
+.cnpj{font-family:var(--dado);font-size:11.5px;color:var(--cal-fraca);opacity:.8}
+.tempo{margin-top:22px}
+.ano{display:grid;grid-template-columns:52px 1fr;gap:13px;align-items:center;padding:11px 0;border-bottom:1px solid var(--argamassa)}
+.ano:last-child{border-bottom:none}
+.ano-n{font-family:var(--dado);font-size:13px;font-weight:700;color:var(--cal-fraca)}
+.ano.pico .ano-n{color:var(--verde-claro)}
+.barra{height:28px;border-radius:5px;background:var(--argamassa);position:relative;overflow:hidden;display:flex;align-items:center;padding-left:11px}
+.barra em{position:absolute;inset:0;width:0;border-radius:5px;background:linear-gradient(90deg,var(--verde-forte),var(--verde));transition:width 1.3s cubic-bezier(.2,.8,.3,1)}
+.ano.pico .barra em{background:linear-gradient(90deg,var(--verde),var(--verde-claro))}
+.barra span{position:relative;font-family:var(--dado);font-size:12.5px;font-weight:700;color:var(--cal)}
+.ano.pico .barra span{color:#06170F}
+
+/* faturamento — leitura antes/depois */
+.fat{display:grid;grid-template-columns:1fr 34px 1fr;align-items:center;gap:8px;margin-top:20px;padding:20px 16px;border-radius:var(--raio);background:var(--concreto-2);border:1px solid var(--argamassa)}
+.fat-cel{text-align:center}
+.fat-rot{font-family:var(--dado);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--cal-fraca);margin-bottom:6px}
+.fat-val{font-family:var(--display);font-weight:800;font-size:clamp(19px,5.4vw,25px);line-height:1.1;letter-spacing:-.02em;color:var(--cal-fraca)}
+.fat-cel.depois .fat-val{color:var(--verde-claro)}
+.fat-cel.depois .fat-rot{color:var(--verde)}
+.fat-seta{display:grid;place-items:center;color:var(--verde)}
+.fat-seta svg{width:22px;height:22px;animation:pisca 2.4s ease-in-out infinite}
+@keyframes pisca{0%,100%{opacity:.45;transform:translateX(-2px)}50%{opacity:1;transform:translateX(2px)}}
+.fat-nota{grid-column:1/-1;text-align:center;font-size:11.5px;color:var(--cal-fraca);margin-top:14px;padding-top:13px;border-top:1px solid var(--argamassa);opacity:.85}
+
+/* ============================================================
+   FORMULÁRIO
+   ============================================================ */
+.bloco{background:var(--concreto-2);border:1px solid var(--argamassa);border-radius:var(--raio);padding:22px}
+#form{scroll-margin-top:calc(var(--topo) + 12px)}
+.campo{margin-bottom:15px}
+.campo label{display:block;font-size:12.5px;color:var(--cal-fraca);margin-bottom:7px;font-weight:500}
+.campo input{width:100%;padding:15px 16px;border-radius:11px;background:var(--concreto);border:1px solid var(--argamassa);color:var(--cal);outline:none;transition:border-color .2s ease,box-shadow .2s ease}
+.campo input::placeholder{color:#556158}
+.campo input:focus{border-color:var(--verde);box-shadow:0 0 0 3px rgba(63,208,126,.12)}
+.check{display:flex;gap:12px;align-items:flex-start;padding:15px;margin-bottom:10px;border:1px solid var(--argamassa);border-radius:11px;cursor:pointer;transition:border-color .2s ease,background .2s ease}
+.check.marcado{border-color:var(--verde);background:var(--verde-fundo)}
+.check input{position:absolute;opacity:0;pointer-events:none}
+.caixa{width:21px;height:21px;flex:none;border-radius:6px;margin-top:1px;border:1.5px solid #3A4A42;display:grid;place-items:center;transition:all .2s ease}
+.check.marcado .caixa{background:var(--verde);border-color:var(--verde)}
+.caixa svg{width:12px;height:12px;opacity:0;transform:scale(.5);transition:all .2s ease}
+.check.marcado .caixa svg{opacity:1;transform:scale(1)}
+.check span{font-size:14px;line-height:1.45}
+.cta[disabled]{background:var(--argamassa);color:#5C6B63;cursor:not-allowed;box-shadow:none}
+.cta[disabled]::after{display:none}
+.medidor{display:flex;gap:4px;margin:20px 0 7px}
+.medidor i{flex:1;height:5px;border-radius:2px;background:var(--argamassa);transition:background .3s ease}
+.medidor i.set{background:var(--verde)}
+.medidor-txt{font-family:var(--dado);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--cal-fraca);text-align:center}
+.form-rodape{font-size:11.5px;color:var(--cal-fraca);text-align:center;margin-top:15px;line-height:1.55;opacity:.8}
+
+.barra-fixa{position:fixed;left:0;right:0;bottom:0;z-index:55;padding:11px 16px calc(11px + env(safe-area-inset-bottom));background:rgba(11,15,13,.9);backdrop-filter:blur(14px);border-top:1px solid var(--argamassa);transform:translateY(110%);transition:transform .34s cubic-bezier(.2,.8,.3,1)}
+.barra-fixa.ver{transform:translateY(0)}
+.barra-fixa .cta{margin:0;padding:15px}
+
+footer{padding:34px 0 130px;border-top:1px solid var(--argamassa);text-align:center}
+footer p{font-size:12px;color:var(--cal-fraca);line-height:1.7}
+
+.sucesso{display:none;text-align:center;padding:34px 20px}
+.sucesso.ver{display:block;animation:abre .5s ease}
+.sucesso .selo{width:62px;height:62px;margin:0 auto 18px;border-radius:18px;background:var(--verde);display:grid;place-items:center;animation:pulsa 1.9s ease-in-out infinite}
+@keyframes pulsa{0%,100%{box-shadow:0 0 0 0 rgba(63,208,126,.42)}50%{box-shadow:0 0 0 18px rgba(63,208,126,0)}}
+
+@media (min-width:640px){section{padding:80px 0}.cta{width:auto;min-width:300px}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+  html{scroll-behavior:auto}.rev{opacity:1;transform:none}.grifo::before{width:100%!important}
+}
+:focus-visible{outline:2px solid var(--verde);outline-offset:3px;border-radius:6px}
+</style>
+</head>
+<body>
+
+<div class="tarja">
+  <p>GRM · <b>Assessoria de vendas para construtoras Minha Casa Minha Vida</b>
+  <span>Corretor autônomo, imobiliária e comprador: esta página não é para você.</span></p>
+  <div class="fiada" id="fiada" aria-hidden="true"></div>
+</div>
+
+<!-- ═══ DOBRA 1 ═══ -->
+<section id="hero">
+  <div class="wrap">
+    <span class="eyebrow">Construtoras MCMV</span>
+    <h1>A GRM cria estrutura digital para construtoras MCMV venderem mais pela internet.</h1>
+
+    <p class="lead" style="margin-top:24px">
+      <strong style="color:var(--verde);font-size:18px">R$ 2 mil em anúncio viram 10 casas vendidas por mês.</strong>
+      <br><br>
+      Como? Unimos sistema próprio de organização e qualificação, dados e tráfego pago — tudo para que
+      chegue no seu WhatsApp somente quem realmente pode comprar a casa.
+    </p>
+
+    <button class="cta ir">Quero vender mais casas
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    </button>
+  </div>
+</section>
+
+<div class="conector" aria-hidden="true"><i></i></div>
+
+<!-- ═══ DOBRA 2 — A CONTA ═══ -->
+<section>
+  <div class="wrap">
+    <div class="rev">
+      <span class="eyebrow">A conta aberta</span>
+      <h2>A VIRTUS <span class="grifo">multiplicou o faturamento por 13</span>, saindo de 6 casas por ano para 80.</h2>
+      <p class="lead">Abaixo está a conta inteira, sem nada escondido.</p>
+    </div>
+
+    <div class="conta">
+      <p class="grupo rev">O que sai por mês</p>
+      <div class="linha saida rev"><span class="linha-rot">Assessoria mensal</span><span class="linha-val">R$ 997</span></div>
+      <div class="linha saida rev"><span class="linha-rot">Verba de anúncio</span><span class="linha-val">R$ 2.000</span></div>
+
+      <p class="grupo rev">O que entra por mês</p>
+      <div class="linha entrada rev"><span class="linha-rot">Interessados que passam no filtro<small>por mês</small></span><span class="linha-val" data-conta="80">0</span></div>
+      <div class="linha entrada rev"><span class="linha-rot">Casas vendidas<small>por mês</small></span><span class="linha-val" data-conta="10">0</span></div>
+
+      <p class="grupo rev">O que fica no seu bolso</p>
+      <div class="linha lucro rev"><span class="linha-rot">Lucro da construtora<small>em <b style="color:var(--verde-claro)">1 casa</b> vendida</small></span><span class="linha-val">R$ 25.000</span></div>
+      <div class="multiplica rev"><span>Multiplicado pelas 10 casas do mês</span><b>R$ 250.000</b></div>
+    </div>
+
+    <p class="legenda rev">Números da VIRTUS CONSTRUÇÕES, jan–ago/2026. A conta do filtro:
+      <span class="mono">R$ 2.000 de verba ÷ R$ 25 por interessado qualificado = 80 interessados no mês.</span>
+      CNPJ 27.431.521/0001-50.</p>
+
+    <button class="cta ir rev">Quero fazer parte
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    </button>
+  </div>
+</section>
+
+<div class="conector" aria-hidden="true"><i></i></div>
+
+<!-- ═══ DOBRA 3 — PROBLEMA ═══ -->
+<section>
+  <div class="wrap rev">
+    <span class="eyebrow">O funil de MCMV</span>
+    <h2>Separe quem pode financiar de quem não pode, antes de gastar o tempo do seu time.</h2>
+    <p class="lead">Em MCMV o funil é cruel. Chegam dezenas de interessados por mês e a maior parte tem restrição no nome,
+      renda que não comprova ou financiamento ativo. Seu corretor descobre isso um por um, depois de horas
+      respondendo mensagens de inúmeros possíveis clientes.</p>
+  </div>
+</section>
+
+<!-- ═══ DOBRA 4 — FRENTES ═══ -->
+<section style="padding-top:0">
+  <div class="wrap">
+    <div class="rev">
+      <span class="eyebrow">O que a GRM entrega</span>
+      <h2>Três frentes. Uma conta só.</h2>
+      <p class="lead">Toque em cada frente para abrir o detalhe.</p>
+    </div>
+
+    <div class="frentes rev">
+      <details class="frente">
+        <summary><span class="frente-num">01</span><h3>Tráfego e qualificação</h3></summary>
+        <div class="frente-corpo"><dl class="fab">
+          <div><dt>O que é</dt><dd>A GRM cria e gerencia seus anúncios, orienta sua rede social e coloca cada interessado num formulário que checa renda, restrição e enquadramento MCMV antes de virar atendimento.</dd></div>
+          <div><dt>A vantagem</dt><dd>Seu corretor recebe apenas quem tem chance real de financiar. Quem não passa nunca chega até ele.</dd></div>
+          <div><dt>O que isso gera para você</dt><dd>Fila previsível de comprador qualificado a custo baixo, todo mês, sem depender de indicação nem de temporada boa.</dd></div>
+        </dl></div>
+      </details>
+
+      <details class="frente">
+        <summary><span class="frente-num">02</span><h3>Corretagem com CRECI</h3></summary>
+        <div class="frente-corpo"><dl class="fab">
+          <div><dt>O que é</dt><dd>A GRM tem CRECI pessoa física e jurídica. Você escolhe: entregamos o comprador pronto para o seu corretor, ou conduzimos a venda inteira até a assinatura.</dd></div>
+          <div><dt>A vantagem</dt><dd>Você cresce em volume de vendas sem montar equipe comercial, sem folha nova e sem custo que continua existindo no mês em que ninguém comprou.</dd></div>
+          <div><dt>O que isso gera para você</dt><dd>Custo de venda que só nasce depois que a venda nasceu. No mês fraco, ele é zero.</dd></div>
+        </dl></div>
+      </details>
+
+      <details class="frente">
+        <summary><span class="frente-num">03</span><h3>Sistema GRM, incluso no plano</h3></summary>
+        <div class="frente-corpo"><dl class="fab">
+          <div><dt>O que é</dt><dd>Portal onde o seu comprador acompanha a construção da casa dele pelo celular, em tempo real. Painel com unidades, clientes e cronograma de obra. E registro da origem e da data de cada cliente que entrou.</dd></div>
+          <div><dt>A vantagem</dt><dd>Organização interna e externa. O cliente para de ligar pedindo notícia da obra e passa a ter uma experiência única. E ninguém precisa discutir de onde veio determinada venda: está registrado.</dd></div>
+          <div><dt>O que isso gera para você</dt><dd>Comissão que você confere na tela, em vez de acreditar na nossa palavra. Cliente informado, que reclama menos e indica mais. E uma operação que continua de pé quando o volume dobrar.</dd></div>
+        </dl></div>
+      </details>
+    </div>
+
+    <button class="cta ir rev">Quero essa estrutura
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    </button>
+  </div>
+</section>
+
+<div class="conector" aria-hidden="true"><i></i></div>
+
+<!-- ═══ DOBRA 5 — PREÇO ═══ -->
+<section class="faixa-preco">
+  <div class="wrap">
+    <div class="rev">
+      <span class="eyebrow">Quanto custa</span>
+      <h2>Um fixo pequeno. E comissão <span class="grifo grifo-claro">só do que foi vendido</span>.</h2>
+    </div>
+
+    <div class="preco">
+      <div class="preco-item rev">
+        <div class="preco-cab"><b>Fixo mensal</b><span>R$ 997</span></div>
+        <small>Assessoria, gestão dos anúncios e sistema completo.</small>
+      </div>
+      <div class="preco-item rev">
+        <div class="preco-cab"><b>Verba de anúncio</b><span>R$ 2.000</span></div>
+        <small>Paga por você, direto à plataforma, na sua conta.</small>
+      </div>
+      <div class="preco-item var rev">
+        <div class="preco-cab"><b>Lead entregue ao seu corretor</b><span>2%</span></div>
+        <small>Sobre cada casa vendida.</small>
+        <span class="selo-zero">Não vendeu = R$ 0</span>
+      </div>
+      <div class="preco-item var rev">
+        <div class="preco-cab"><b>GRM conduz a venda inteira</b><span>4%</span></div>
+        <small>Sobre cada casa vendida.</small>
+        <span class="selo-zero">Não vendeu = R$ 0</span>
+      </div>
+    </div>
+
+    <div class="destaque rev">
+      <b>Duas casas a mais no ano pagam o ano inteiro.</b>
+      <p>São <u>R$ 35.964</u> de custo fixo anual contra <u>R$ 50 mil</u> de lucro em duas casas.</p>
+    </div>
+
+    <button class="cta ir rev" style="background:var(--verde-claro)">Quero saber mais
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    </button>
+  </div>
+</section>
+
+<!-- ═══ DOBRA 6 — FAQ ═══ -->
+<section>
+  <div class="wrap">
+    <div class="rev">
+      <span class="eyebrow">Perguntas diretas</span>
+      <h2>O que você provavelmente está pensando agora.</h2>
+    </div>
+    <div class="faq rev">
+      <details>
+        <summary>4% é caro. Contrato dois corretores por menos.</summary>
+        <p>Dois corretores custam salário todos os meses, inclusive naquele em que ninguém comprou. E ainda dependem de alguém trazendo o cliente até eles. É exatamente por isso que existe o plano de 2%: para quem já tem equipe e só quer o comprador pronto na mão dela.</p>
+      </details>
+      <details>
+        <summary>Como sei que a venda veio de vocês?</summary>
+        <p>Todo interessado entra pelo formulário, com data e origem gravadas no sistema. A comissão só vale para CPF cadastrado por nós dentro da janela definida em contrato.</p>
+      </details>
+      <details>
+        <summary>Quem paga o anúncio?</summary>
+        <p>Você, direto para a plataforma, com sua conta e seu cartão. A GRM opera, você acompanha o gasto. Não passa pelo nosso caixa.</p>
+      </details>
+      <details>
+        <summary>Preciso ter equipe de vendas montada?</summary>
+        <p>Não. Se você já tem corretor, entregamos o comprador qualificado para ele no plano de 2%. Se não tem, a GRM conduz a venda inteira com CRECI próprio no plano de 4%.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<div class="conector" aria-hidden="true"><i></i></div>
+
+<!-- ═══ DOBRA 7 — CASOS DE SUCESSO ═══ -->
+<section>
+  <div class="wrap">
+    <div class="rev">
+      <span class="eyebrow">Casos de sucesso</span>
+      <h2>De onde vêm esses números.</h2>
+      <p class="lead">O método nasceu na <span class="empresa">VIRTUS CONSTRUÇÕES</span> <span class="cnpj">· CNPJ 27.431.521/0001-50</span> — empresa do Matheus, dono de construtora e sócio da GRM.</p>
+    </div>
+
+    <div class="tempo rev" id="tempo">
+      <div class="ano"><span class="ano-n">2024</span><div class="barra" data-p="8"><em></em><span>6 casas</span></div></div>
+      <div class="ano"><span class="ano-n">2025</span><div class="barra" data-p="45"><em></em><span>36 casas</span></div></div>
+      <div class="ano pico"><span class="ano-n">2026</span><div class="barra" data-p="100"><em></em><span>80 casas até agora</span></div></div>
+    </div>
+
+    <div class="fat rev">
+      <div class="fat-cel"><div class="fat-rot">Faturava</div><div class="fat-val">R$ 720 mil</div></div>
+      <div class="fat-seta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      <div class="fat-cel depois"><div class="fat-rot">Fatura hoje</div><div class="fat-val">R$ 9,6 milhões</div></div>
+      <p class="fat-nota">Crescimento construído em dois anos de marketing e reorganização de processos.</p>
+    </div>
+
+    <button class="cta ir rev">Quero entender mais
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    </button>
+  </div>
+</section>
+
+<!-- ═══ DOBRA 8 — FILTRO ═══ -->
+<section style="padding-top:0">
+  <div class="wrap rev">
+    <div class="bloco" style="border-color:#2C4A3B;background:var(--verde-fundo)">
+      <span class="eyebrow">Filtro</span>
+      <h2 style="font-size:26px">A gente não atende todo mundo.</h2>
+      <p style="color:#A9C4B4;font-size:15px">Trabalhamos apenas com construtoras que operam Minha Casa Minha Vida e têm
+        <strong style="color:var(--verde-claro)">no mínimo 20 unidades disponíveis para venda</strong>.</p>
+    </div>
+  </div>
+</section>
+
+<div class="conector" aria-hidden="true"><i></i></div>
+
+<!-- ═══ DOBRA 9 — FORMULÁRIO ═══ -->
+<section id="form">
+  <div class="wrap">
+    <div id="formArea">
+      <div class="rev">
+        <span class="eyebrow">Última etapa</span>
+        <h2>Venda mais casas todos os dias com a nossa metodologia.</h2>
+        <p class="lead">Responda os campos abaixo. Depois disso, marcamos uma reunião de 20 minutos para entender a sua realidade.</p>
+      </div>
+
+      <div class="medidor" id="medidor" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+      <p class="medidor-txt" id="medidorTxt">0 de 5 preenchidos</p>
+
+      <div style="margin-top:20px">
+        <div class="campo"><label for="nome">Seu nome</label><input type="text" id="nome" placeholder="Nome e sobrenome" autocomplete="name"></div>
+        <div class="campo"><label for="zap">WhatsApp</label><input type="tel" id="zap" placeholder="(00) 00000-0000" inputmode="numeric" autocomplete="tel"></div>
+        <div class="campo"><label for="empresa">Nome da construtora</label><input type="text" id="empresa" placeholder="Razão social ou nome fantasia" autocomplete="organization"></div>
+
+        <label class="check" id="c1"><input type="checkbox" id="dono">
+          <span class="caixa"><svg viewBox="0 0 24 24" fill="none" stroke="#06170F" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+          <span>Sou o dono ou sócio da construtora</span></label>
+
+        <label class="check" id="c2"><input type="checkbox" id="unid">
+          <span class="caixa"><svg viewBox="0 0 24 24" fill="none" stroke="#06170F" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+          <span>Tenho 20 ou mais unidades MCMV disponíveis</span></label>
+
+        <button class="cta" id="enviar" disabled><span id="enviarTxt">Preencha tudo para liberar</span></button>
+
+        <p class="form-rodape">Atendemos apenas construtoras MCMV. Ao enviar, você concorda que a GRM use estes dados
+          para entrar em contato sobre esta proposta comercial.</p>
+      </div>
+    </div>
+
+    <div class="sucesso" id="sucesso">
+      <div class="selo"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#06170F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+      <h2>Cadastro recebido.</h2>
+      <p class="lead">Estamos te levando para o WhatsApp da GRM agora.</p>
+      <a class="cta" id="linkZap" href="#">Abrir o WhatsApp
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer><div class="wrap"><p>
+  <strong style="color:var(--verde);font-family:var(--display)">GRM Imobi</strong><br>
+  GRM Serviços Imobiliários e de Tecnologia Ltda<br>
+  CNPJ 66.514.947/0001-29 · Tobias Barreto/SE
+</p></div></footer>
+
+<div class="barra-fixa" id="barraFixa">
+  <button class="cta ir">Falar com a GRM
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </button>
+</div>
+
+<script>
+/* ═══ CONFIGURAÇÃO — edite só estas duas linhas ═══ */
+const WHATSAPP = '5579998667711';
+const PLANILHA = '';   // cole aqui a URL /exec do Google Apps Script
+
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+
+/* fiada de progresso */
+(function(){const f=$('#fiada');if(!f)return;const n=22,t=[];
+for(let i=0;i<n;i++){const b=document.createElement('i');f.appendChild(b);t.push(b);}
+const up=()=>{const a=document.documentElement.scrollHeight-innerHeight;const p=a>0?scrollY/a:0;const q=Math.round(p*n);t.forEach((x,i)=>x.classList.toggle('set',i<q));};
+addEventListener('scroll',up,{passive:true});up();})();
+
+/* revelação */
+(function(){const io=new IntersectionObserver(e=>{e.forEach((x,i)=>{if(x.isIntersecting){x.target.style.transitionDelay=(i*70)+'ms';x.target.classList.add('in');io.unobserve(x.target);}});},{threshold:.12,rootMargin:'0px 0px -8% 0px'});
+$$('.rev').forEach(a=>io.observe(a));})();
+
+/* contadores */
+(function(){const io=new IntersectionObserver(e=>{e.forEach(x=>{if(!x.isIntersecting)return;const el=x.target,fim=+el.dataset.conta,d=900;let t0=null;
+const p=t=>{if(!t0)t0=t;const k=Math.min((t-t0)/d,1);el.textContent=Math.round(fim*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(p);};
+requestAnimationFrame(p);io.unobserve(el);});},{threshold:.6});
+$$('[data-conta]').forEach(el=>io.observe(el));})();
+
+/* barras */
+(function(){const io=new IntersectionObserver(e=>{e.forEach(x=>{if(!x.isIntersecting)return;
+$$('#tempo .barra').forEach((b,i)=>setTimeout(()=>b.querySelector('em').style.width=b.dataset.p+'%',i*180));io.disconnect();});},{threshold:.4});
+const t=$('#tempo');if(t)io.observe(t);})();
+
+/* CTAs → formulário */
+$$('.ir').forEach(b=>b.addEventListener('click',()=>{
+  $('#form').scrollIntoView({behavior:'smooth',block:'start'});
+  setTimeout(()=>$('#nome').focus({preventScroll:true}),700);
+}));
+
+/* barra fixa */
+(function(){const bar=$('#barraFixa');
+const io=new IntersectionObserver(e=>{e.forEach(x=>{
+  if(x.target.id==='hero'||x.target.id==='form'){
+    if(x.isIntersecting)bar.classList.remove('ver');
+    else if(x.target.id==='hero')bar.classList.add('ver');
+  }});},{threshold:.15});
+io.observe($('#hero'));io.observe($('#form'));})();
+
+/* máscara */
+$('#zap').addEventListener('input',e=>{let v=e.target.value.replace(/\D/g,'').slice(0,11);
+if(v.length>6)v='('+v.slice(0,2)+') '+v.slice(2,7)+'-'+v.slice(7);
+else if(v.length>2)v='('+v.slice(0,2)+') '+v.slice(2);
+else if(v.length)v='('+v;e.target.value=v;});
+
+/* validação */
+const campos=['#nome','#zap','#empresa'].map($);
+const checks=[{c:$('#dono'),w:$('#c1')},{c:$('#unid'),w:$('#c2')}];
+const btn=$('#enviar'),btnTxt=$('#enviarTxt');
+function valida(){
+  const ok=[$('#nome').value.trim().length>=3,
+            $('#zap').value.replace(/\D/g,'').length>=10,
+            $('#empresa').value.trim().length>=2,
+            $('#dono').checked,$('#unid').checked];
+  const n=ok.filter(Boolean).length;
+  $$('#medidor i').forEach((i,k)=>i.classList.toggle('set',k<n));
+  $('#medidorTxt').textContent = n===5?'Tudo pronto — pode enviar':n+' de 5 preenchidos';
+  checks.forEach(({c,w})=>w.classList.toggle('marcado',c.checked));
+  btn.disabled=n<5;
+  btnTxt.textContent=n<5?'Preencha tudo para liberar':'ENVIAR INFORMAÇÕES';
+}
+campos.forEach(c=>c.addEventListener('input',valida));
+checks.forEach(({c})=>c.addEventListener('change',valida));
+valida();
+
+/* envio */
+btn.addEventListener('click',async()=>{
+  if(btn.disabled)return;
+  btn.disabled=true;btnTxt.textContent='Enviando…';
+  const d={nome:$('#nome').value.trim(),whatsapp:$('#zap').value.trim(),empresa:$('#empresa').value.trim(),
+    dono:'Sim',unidades:'20 ou mais',origem:location.href,
+    data:new Date().toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'})};
+  if(PLANILHA){try{await fetch(PLANILHA,{method:'POST',body:new URLSearchParams(d)});}catch(err){console.warn(err);}}
+  const msg=encodeURIComponent('Olá, GRM! Enviei meu cadastro pelo site.\n\nNome: '+d.nome+
+    '\nConstrutora: '+d.empresa+'\nWhatsApp: '+d.whatsapp+
+    '\nSou dono/sócio: sim\nUnidades MCMV disponíveis: 20 ou mais');
+  const link='https://wa.me/'+WHATSAPP+'?text='+msg;
+  $('#linkZap').href=link;
+  $('#formArea').style.display='none';
+  $('#sucesso').classList.add('ver');
+  $('#form').scrollIntoView({behavior:'smooth',block:'center'});
+  setTimeout(()=>{location.href=link;},1400);
+});
+</script>
+</body>
+</html>
