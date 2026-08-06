@@ -252,8 +252,67 @@ footer p{font-size:12px;color:var(--cal-fraca);line-height:1.7}
 }
 :focus-visible{outline:2px solid var(--verde);outline-offset:3px;border-radius:6px}
 </style>
+
+<!-- ═══════════════════════════════════════════════════════════
+     CONFIGURAÇÃO — edite as TRÊS linhas abaixo
+     ═══════════════════════════════════════════════════════════ -->
+<script>
+var WHATSAPP    = '5579998667711';
+var PLANILHA    = 'https://script.google.com/macros/s/AKfycbwC1rg-WiWfp5vcg1hUewnoSqKTffSvY25CIEHEF1aIzMjFfDjlVJviu3jWetpDg_4J/exec';
+var META_PIXEL  = '1024252233730344';   // ID do Pixel da Meta (público, pode ficar aqui)
+
+/* ── Captura de origem: UTM da campanha ou referrer do tráfego orgânico ── */
+var GRM_TRACK = (function () {
+  var q   = new URLSearchParams(location.search);
+  var g   = function (k) { return (q.get(k) || '').trim(); };
+  var src = g('utm_source'), med = g('utm_medium'), camp = g('utm_campaign');
+  var cont= g('utm_content'), term = g('utm_term'), fbc = g('fbclid');
+  var ref = document.referrer || '';
+  var origem;
+
+  if (src)                                   origem = src + (med ? ' / ' + med : '');
+  else if (fbc)                              origem = 'Meta Ads (sem UTM)';
+  else if (/instagram\./i.test(ref))         origem = 'Instagram (organico)';
+  else if (/facebook\.|fb\./i.test(ref))     origem = 'Facebook (organico)';
+  else if (/google\./i.test(ref))            origem = 'Google (organico)';
+  else if (/whatsapp|wa\.me|l\.wl\.co/i.test(ref)) origem = 'WhatsApp';
+  else if (ref)                              origem = 'Referencia: ' + ref.replace(/^https?:\/\//, '').split('/')[0];
+  else                                       origem = 'Direto';
+
+  return {
+    origem: origem, utm_source: src, utm_medium: med, utm_campaign: camp,
+    utm_content: cont, utm_term: term, fbclid: fbc,
+    url: location.href, referrer: ref
+  };
+})();
+
+/* ── Pixel da Meta ── */
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}
+(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+
+if (META_PIXEL) {
+  fbq('init', META_PIXEL);
+  fbq('track', 'PageView');
+}
+
+/* Dispara evento só se o pixel estiver configurado. eventID já pronto para
+   deduplicação futura com a API de Conversões. */
+function metaEvento(nome, dados) {
+  if (!META_PIXEL || typeof fbq !== 'function') return null;
+  var id = nome + '.' + Date.now() + '.' + Math.random().toString(36).slice(2, 8);
+  try { fbq('track', nome, dados || {}, { eventID: id }); } catch (e) {}
+  return id;
+}
+</script>
 </head>
 <body>
+
+<!-- Meta Pixel — fallback para navegador sem JavaScript -->
+<noscript><img height="1" width="1" style="display:none" alt=""
+src="https://www.facebook.com/tr?id=1024252233730344&ev=PageView&noscript=1"/></noscript>
 
 <div class="tarja">
   <p>GRM · <b>Assessoria de vendas para construtoras Minha Casa Minha Vida</b>
@@ -543,10 +602,7 @@ footer p{font-size:12px;color:var(--cal-fraca);line-height:1.7}
 </div>
 
 <script>
-/* ═══ CONFIGURAÇÃO — edite só estas duas linhas ═══ */
-const WHATSAPP = '5579998667711';
-const PLANILHA = 'https://script.google.com/macros/s/AKfycbwC1rg-WiWfp5vcg1hUewnoSqKTffSvY25CIEHEF1aIzMjFfDjlVJviu3jWetpDg_4J/exec';   // cole aqui a URL /exec do Google Apps Script
-
+/* Configuração fica no <head>: WHATSAPP, PLANILHA, META_PIXEL */
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 
 /* fiada de progresso */
@@ -572,9 +628,17 @@ const t=$('#tempo');if(t)io.observe(t);})();
 
 /* CTAs → formulário */
 $$('.ir').forEach(b=>b.addEventListener('click',()=>{
+  metaEvento('InitiateCheckout',{content_name:'CTA para formulario',
+    content_category:(b.textContent||'').trim().slice(0,40)});
   $('#form').scrollIntoView({behavior:'smooth',block:'start'});
   setTimeout(()=>$('#nome').focus({preventScroll:true}),700);
 }));
+
+/* ViewContent quando a dobra de preço entra na tela — sinaliza intenção real */
+(function(){const alvo=document.querySelector('.faixa-preco');if(!alvo)return;
+const io=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){
+  metaEvento('ViewContent',{content_name:'Dobra de preco'});io.disconnect();}});},{threshold:.4});
+io.observe(alvo);})();
 
 /* barra fixa */
 (function(){const bar=$('#barraFixa');
@@ -611,14 +675,67 @@ campos.forEach(c=>c.addEventListener('input',valida));
 checks.forEach(({c})=>c.addEventListener('change',valida));
 valida();
 
+/* registro do lead — dois canais independentes, imunes a CORS.
+   O Apps Script ignora duplicata do mesmo WhatsApp em 2 minutos. */
+function registra(d){
+  if(!PLANILHA){ console.warn('GRM: const PLANILHA esta vazia.'); return; }
+  var qs = new URLSearchParams(d).toString();
+
+  // canal 1 — sendBeacon: sobrevive a navegacao da pagina
+  var ok = false;
+  try { ok = navigator.sendBeacon(PLANILHA, new URLSearchParams(d)); } catch(e){}
+
+  // canal 2 — GET por imagem: funciona ate em file:// e sem CORS
+  try { new Image().src = PLANILHA + '?' + qs + '&_=' + Date.now(); } catch(e){}
+
+  console.log('GRM lead enviado. beacon=' + ok);
+}
+
 /* envio */
 btn.addEventListener('click',async()=>{
   if(btn.disabled)return;
   btn.disabled=true;btnTxt.textContent='Enviando…';
-  const d={nome:$('#nome').value.trim(),whatsapp:$('#zap').value.trim(),empresa:$('#empresa').value.trim(),
-    dono:'Sim',unidades:'20 ou mais',origem:location.href,
-    data:new Date().toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'})};
-  if(PLANILHA){try{await fetch(PLANILHA,{method:'POST',body:new URLSearchParams(d)});}catch(err){console.warn(err);}}
+  const d={
+    nome:$('#nome').value.trim(),
+    whatsapp:$('#zap').value.trim(),
+    empresa:$('#empresa').value.trim(),
+    dono:'Sim',
+    unidades:'20 ou mais',
+    data:new Date().toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'}),
+    /* rastreio */
+    origem:       GRM_TRACK.origem,
+    utm_source:   GRM_TRACK.utm_source,
+    utm_medium:   GRM_TRACK.utm_medium,
+    utm_campaign: GRM_TRACK.utm_campaign,
+    utm_content:  GRM_TRACK.utm_content,
+    utm_term:     GRM_TRACK.utm_term,
+    fbclid:       GRM_TRACK.fbclid,
+    referrer:     GRM_TRACK.referrer,
+    url:          GRM_TRACK.url
+  };
+  registra(d);
+
+  /* Correspondência avançada — melhora a atribuição da Meta.
+     O fbq faz o hash dos dados no navegador antes de enviar. */
+  if(META_PIXEL && typeof fbq==='function'){
+    try{
+      const partes=d.nome.split(' ');
+      fbq('init',META_PIXEL,{
+        ph:'55'+d.whatsapp.replace(/\D/g,''),
+        fn:(partes[0]||'').toLowerCase(),
+        ln:(partes.slice(1).join(' ')||'').toLowerCase(),
+        country:'br'
+      });
+    }catch(e){}
+  }
+  /* LEAD — dispara exclusivamente aqui, no clique do botao ENVIAR INFORMACOES,
+     e só depois da validacao dos 5 campos. Nao dispara em rolagem, em CTA
+     intermediario nem no carregamento da pagina. */
+  metaEvento('Lead',{
+    content_name:'Formulario construtoras MCMV',
+    content_category:d.utm_campaign || d.origem,
+    value:997, currency:'BRL'
+  });
   const msg=encodeURIComponent('Olá, GRM! Enviei meu cadastro pelo site.\n\nNome: '+d.nome+
     '\nConstrutora: '+d.empresa+'\nWhatsApp: '+d.whatsapp+
     '\nSou dono/sócio: sim\nUnidades MCMV disponíveis: 20 ou mais');
@@ -627,6 +744,7 @@ btn.addEventListener('click',async()=>{
   $('#formArea').style.display='none';
   $('#sucesso').classList.add('ver');
   $('#form').scrollIntoView({behavior:'smooth',block:'center'});
+  metaEvento('Contact',{content_name:'Redirecionado ao WhatsApp'});
   setTimeout(()=>{location.href=link;},1400);
 });
 </script>
