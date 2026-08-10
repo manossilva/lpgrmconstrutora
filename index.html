@@ -300,10 +300,45 @@ if (META_PIXEL) {
 
 /* Dispara evento só se o pixel estiver configurado. eventID já pronto para
    deduplicação futura com a API de Conversões. */
-function metaEvento(nome, dados) {
+/* Le cookies do navegador (_fbp e _fbc) para melhorar a correspondencia. */
+function grmCookie(nome) {
+  var m = document.cookie.match(new RegExp('(^| )' + nome + '=([^;]+)'));
+  return m ? decodeURIComponent(m[2]) : '';
+}
+
+/* Envia o MESMO evento para a API de Conversoes (server-side, /api/capi).
+   O eventID identico ao do Pixel garante a deduplicacao na Meta. */
+function capiEvento(nome, id, dados, pessoal) {
+  var corpo = {
+    event_name: nome,
+    event_id: id,
+    event_source_url: location.href,
+    action_source: 'website',
+    user_data: {
+      name:  (pessoal && pessoal.name)  || '',
+      phone: (pessoal && pessoal.phone) || '',
+      email: (pessoal && pessoal.email) || '',
+      fbp: grmCookie('_fbp'),
+      fbc: grmCookie('_fbc') ||
+           (GRM_TRACK.fbclid ? 'fb.1.' + Date.now() + '.' + GRM_TRACK.fbclid : '')
+    },
+    custom_data: dados || {}
+  };
+  try {
+    fetch('/api/capi', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(corpo),
+      keepalive: true
+    }).catch(function () {});
+  } catch (e) {}
+}
+
+function metaEvento(nome, dados, pessoal) {
   if (!META_PIXEL || typeof fbq !== 'function') return null;
   var id = nome + '.' + Date.now() + '.' + Math.random().toString(36).slice(2, 8);
   try { fbq('track', nome, dados || {}, { eventID: id }); } catch (e) {}
+  capiEvento(nome, id, dados, pessoal);
   return id;
 }
 </script>
@@ -735,6 +770,9 @@ btn.addEventListener('click',async()=>{
     content_name:'Formulario construtoras MCMV',
     content_category:d.utm_campaign || d.origem,
     value:997, currency:'BRL'
+  }, {
+    name:  d.nome,
+    phone: '55' + d.whatsapp.replace(/\D/g, '')
   });
   const msg=encodeURIComponent('Olá, GRM! Enviei meu cadastro pelo site.\n\nNome: '+d.nome+
     '\nConstrutora: '+d.empresa+'\nWhatsApp: '+d.whatsapp+
