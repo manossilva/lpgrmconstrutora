@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Onboarding GRM — Ficha de Implantação</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   GRM — ONBOARDING DO CLIENTE  ·  v2
+   Backend: Google Apps Script (Sheets + Drive + e-mail)
+   Configuração única: window.GRM_CONFIG.ENDPOINT
+   ============================================================ */
+:root{
+  --bg:#080B0A; --panel:#0F1513; --panel-2:#141C19;
+  --line:#1E2A25; --line-hot:#2A3B33;
+  --green:#22C55E; --green-dim:#16A34A; --green-glow:rgba(34,197,94,.14);
+  --txt:#E8EFEA; --txt-2:#8FA396; --txt-3:#5C6E64;
+  --amber:#F59E0B; --red:#EF4444; --r:14px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:'Inter',system-ui,-apple-system,sans-serif;font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;padding-bottom:env(safe-area-inset-bottom)}
+h1,h2,h3{font-family:'Outfit',sans-serif;margin:0;line-height:1.15;letter-spacing:-.02em}
+.wrap{max-width:560px;margin:0 auto;padding:0 16px}
+.screen{display:none}.screen.on{display:block;animation:fade .35s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(8,11,10,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
+.topbar-in{max-width:560px;margin:0 auto;padding:12px 16px 10px;display:flex;align-items:center;gap:12px}
+.brand{font-family:'Outfit';font-weight:800;font-size:15px;letter-spacing:.06em}.brand span{color:var(--green)}
+.step-count{margin-left:auto;font-family:'JetBrains Mono';font-size:11px;color:var(--txt-3);letter-spacing:.08em}
+.bar{height:3px;background:var(--line);position:relative;overflow:hidden}
+.bar i{position:absolute;inset:0 auto 0 0;width:0;background:linear-gradient(90deg,var(--green-dim),var(--green));transition:width .45s cubic-bezier(.4,0,.2,1)}
+.pane{padding:24px 0 130px}
+.eyebrow{font-family:'JetBrains Mono';font-size:10.5px;letter-spacing:.18em;color:var(--green);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.eyebrow::before{content:"";width:14px;height:1px;background:var(--green)}
+h2.title{font-size:26px;font-weight:800;margin-bottom:8px}
+.sub{color:var(--txt-2);font-size:14.5px;margin:0 0 24px}
+.field{margin-bottom:18px}
+label{display:block;font-size:13.5px;font-weight:600;color:var(--txt);margin-bottom:7px}
+label .opt{font-weight:400;color:var(--txt-3);font-size:12px}
+.hint{font-size:12.5px;color:var(--txt-3);margin-top:6px;line-height:1.5}
+input[type=text],input[type=tel],input[type=email],input[type=password],select,textarea{width:100%;padding:14px 15px;font-size:16px;color:var(--txt);background:var(--panel);border:1px solid var(--line);border-radius:var(--r);font-family:'Inter',sans-serif;outline:none;transition:border-color .2s,background .2s}
+input.num{font-family:'JetBrains Mono';letter-spacing:.02em}
+input:focus,select:focus,textarea:focus{border-color:var(--green);background:var(--panel-2)}
+input::placeholder{color:#41504a}
+input.err,select.err{border-color:var(--red)}
+.msg-err{color:var(--red);font-size:12.5px;margin-top:6px;display:none}.msg-err.on{display:block}
+select{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'><path d='M1 1l5 5 5-5' stroke='%238FA396' stroke-width='1.6'/></svg>");background-repeat:no-repeat;background-position:right 16px center}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:420px){.row{grid-template-columns:1fr}}
+.drop{border:1px dashed var(--line-hot);border-radius:var(--r);background:var(--panel);padding:22px;text-align:center;cursor:pointer;transition:.2s}
+.drop:active{background:var(--panel-2);border-color:var(--green)}
+.drop b{display:block;font-family:'Outfit';font-weight:600;font-size:14px;margin-bottom:3px}
+.drop small{color:var(--txt-3);font-size:12px}
+.logo-prev{display:none;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px}
+.logo-prev.on{display:flex}
+.logo-prev img{width:56px;height:56px;object-fit:contain;background:#fff;border-radius:10px;padding:4px}
+.logo-prev .nm{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.logo-prev .sz{font-family:'JetBrains Mono';font-size:11px;color:var(--txt-3)}
+.linkbtn{background:none;border:none;color:var(--red);font-size:12.5px;font-weight:600;cursor:pointer;padding:6px;margin-left:auto;font-family:inherit}
+.info{background:var(--panel);border:1px solid var(--line);border-left:2px solid var(--green);border-radius:10px;padding:16px;margin-bottom:16px}
+.info p{margin:0 0 10px;font-size:13.5px;color:var(--txt-2);line-height:1.6}.info p:last-child{margin-bottom:0}
+.info ul{margin:8px 0 0;padding-left:18px}
+.info li{font-size:13.5px;color:var(--txt-2);margin-bottom:6px}
+.warn{border-left-color:var(--amber)}.warn .tag{color:var(--amber)}
+.tag{font-family:'JetBrains Mono';font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--green);display:block;margin-bottom:6px}
+.pick{display:block;position:relative;cursor:pointer;margin-bottom:12px}
+.pick input{position:absolute;opacity:0;pointer-events:none}
+.pick .box{border:1px solid var(--line);background:var(--panel);border-radius:var(--r);padding:18px;transition:.2s}
+.pick input:checked + .box{border-color:var(--green);background:linear-gradient(180deg,var(--green-glow),transparent 60%)}
+.pick input:focus-visible + .box{outline:2px solid var(--green);outline-offset:2px}
+.pick .pct{font-family:'JetBrains Mono';font-weight:700;font-size:30px;color:var(--green);line-height:1}
+.pick .fixo{font-family:'JetBrains Mono';font-size:12px;color:var(--txt-3);margin-top:4px}
+.pick .nm{font-family:'Outfit';font-weight:600;font-size:15px;margin:8px 0 6px}
+.pick .ds{font-size:13px;color:var(--txt-2);line-height:1.6}
+.pick .mark{position:absolute;top:16px;right:16px;width:20px;height:20px;border-radius:50%;border:1px solid var(--line-hot)}
+.pick input:checked ~ .mark{border-color:var(--green);background:var(--green);box-shadow:inset 0 0 0 3px var(--panel)}
+.check{display:flex;gap:12px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer}
+.check input{width:20px;height:20px;margin:1px 0 0;accent-color:var(--green);flex:0 0 auto}
+.check span{font-size:13.5px;color:var(--txt-2);line-height:1.55}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.chip{font-family:'JetBrains Mono';font-size:13px;font-weight:700;padding:10px 16px;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--txt-2);cursor:pointer;transition:.15s}
+.chip.on{background:var(--green);border-color:var(--green);color:#04120A}
+input[type=range]{width:100%;height:34px;appearance:none;background:transparent;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--green) var(--fill,10%),var(--line) var(--fill,10%))}
+input[type=range]::-webkit-slider-thumb{appearance:none;width:26px;height:26px;border-radius:50%;background:var(--green);border:4px solid var(--bg);margin-top:-10px;box-shadow:0 0 0 1px var(--green)}
+input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:var(--line)}
+input[type=range]::-moz-range-progress{height:6px;border-radius:3px;background:var(--green)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border:4px solid var(--bg);border-radius:50%;background:var(--green)}
+.calc{background:var(--panel-2);border:1px solid var(--line-hot);border-radius:var(--r);padding:20px;margin-top:18px}
+.calc .big{font-family:'JetBrains Mono';font-weight:700;font-size:34px;color:var(--green);line-height:1.05;letter-spacing:-.02em}
+.calc .lbl{font-family:'JetBrains Mono';font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt-3);margin-bottom:6px}
+.calc hr{border:none;border-top:1px solid var(--line);margin:16px 0}
+.gr{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.gr .v{font-family:'JetBrains Mono';font-weight:500;font-size:17px;color:var(--txt)}
+.rev{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:14px}
+.rev h3{font-size:13px;padding:13px 16px;background:var(--panel-2);border-bottom:1px solid var(--line);font-weight:600;display:flex;align-items:center}
+.rev h3 button{margin-left:auto;background:none;border:none;color:var(--green);font-size:12px;font-weight:700;cursor:pointer;font-family:'JetBrains Mono';letter-spacing:.06em}
+.rev dl{margin:0;padding:6px 16px 12px}
+.rev .it{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid rgba(30,42,37,.5);font-size:13.5px}
+.rev .it:last-child{border-bottom:none}
+.rev dt{color:var(--txt-3);flex:1 1 46%}
+.rev dd{margin:0;flex:1 1 54%;text-align:right;font-weight:500;word-break:break-word}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:60;background:linear-gradient(180deg,transparent,rgba(8,11,10,.96) 22%);padding:24px 16px calc(16px + env(safe-area-inset-bottom))}
+.nav-in{max-width:560px;margin:0 auto;display:flex;gap:10px}
+.btn{flex:1;padding:16px;border-radius:12px;border:none;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:600;font-size:15.5px;transition:.15s}
+.btn-p{background:var(--green);color:#04120A}
+.btn-p:active{transform:scale(.985);background:var(--green-dim)}
+.btn-p:disabled{opacity:.45;cursor:not-allowed}
+.btn-s{flex:0 0 88px;background:var(--panel);color:var(--txt-2);border:1px solid var(--line)}
+:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.login{padding:44px 0 60px;text-align:center}
+.login .logo{font-family:'Outfit';font-weight:800;font-size:30px;letter-spacing:-.02em;margin-bottom:6px}
+.login .logo span{color:var(--green)}
+.login .kicker{font-family:'JetBrains Mono';font-size:10.5px;letter-spacing:.2em;color:var(--txt-3);text-transform:uppercase;margin-bottom:34px}
+.tabs{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:22px}
+.tabs button{flex:1;padding:11px;border:none;background:none;color:var(--txt-3);font-family:'Inter';font-weight:600;font-size:13.5px;border-radius:9px;cursor:pointer}
+.tabs button.on{background:var(--panel-2);color:var(--txt)}
+.login .field{text-align:left}
+.foot{text-align:center;color:var(--txt-3);font-size:11.5px;margin-top:26px;line-height:1.6}
+.done{text-align:center;padding:70px 0}
+.done .ring{width:76px;height:76px;border-radius:50%;border:2px solid var(--green);display:grid;place-items:center;margin:0 auto 22px;color:var(--green);font-size:34px}
+.pill{display:inline-block;font-family:'JetBrains Mono';font-size:12px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 16px;color:var(--txt-2);margin-top:16px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="topbar" id="topbar" style="display:none">
+  <div class="topbar-in">
+    <div class="brand">GRM<span>.</span>ONBOARDING</div>
+    <div class="step-count" id="stepCount">01 / 07</div>
+  </div>
+  <div class="bar"><i id="barFill"></i></div>
+</header>
+
+<!-- ==================== LOGIN ==================== -->
+<section class="screen on" id="scLogin">
+  <div class="wrap login">
+    <div class="logo">GRM<span>.</span></div>
+    <div class="kicker">Ficha de implantação</div>
+    <div class="tabs">
+      <button type="button" class="on" data-tab="new">Primeiro acesso</button>
+      <button type="button" data-tab="back">Continuar depois</button>
+    </div>
+    <div class="field">
+      <label for="lgCnpj">CNPJ da construtora</label>
+      <input type="tel" id="lgCnpj" class="num" inputmode="numeric" placeholder="00.000.000/0000-00" maxlength="18" autocomplete="off">
+      <div class="msg-err" id="errCnpj">CNPJ inválido. Confira os números.</div>
+    </div>
+    <div class="field">
+      <label for="lgPass" id="lbPass">Crie uma senha</label>
+      <input type="password" id="lgPass" placeholder="mínimo 6 caracteres" autocomplete="current-password">
+      <div class="hint" id="hintPass">Use o CNPJ + esta senha para voltar e ajustar as respostas em qualquer aparelho.</div>
+      <div class="msg-err" id="errPass">Senha muito curta.</div>
+    </div>
+    <button class="btn btn-p" id="btnLogin" style="width:100%">Começar</button>
+    <div class="foot">Leva cerca de 8 minutos.<br>Você pode parar no meio e retomar de onde estava.</div>
+  </div>
+</section>
+
+<!-- ==================== FORMULÁRIO ==================== -->
+<main class="screen" id="scForm">
+<div class="wrap"><div class="pane">
+
+  <!-- 1. EMPRESA -->
+  <section class="step" data-step="0">
+    <div class="eyebrow">Etapa 1 — A construtora</div>
+    <h2 class="title">Quem é a empresa</h2>
+    <p class="sub">Esses dados vão para o contrato, para as peças de anúncio e para o cadastro no correspondente.</p>
+    <div class="field">
+      <label>Logo da construtora</label>
+      <div class="drop" id="dropLogo"><b>Enviar logo</b><small>PNG com fundo transparente, até 3 MB</small></div>
+      <div class="logo-prev" id="logoPrev">
+        <img id="logoImg" alt="Logo enviada">
+        <div style="min-width:0"><div class="nm" id="logoName"></div><div class="sz" id="logoSize"></div></div>
+        <button type="button" class="linkbtn" id="logoDel">Remover</button>
+      </div>
+      <input type="file" id="fileLogo" accept="image/*" hidden>
+      <div class="hint">Se não tiver a logo no celular agora, siga em frente e envie depois pelo WhatsApp.</div>
+    </div>
+    <div class="field"><label for="fRazao">Razão social</label>
+      <input type="text" id="fRazao" data-req placeholder="Como está no cartão CNPJ" autocomplete="organization">
+      <div class="msg-err">Campo obrigatório.</div></div>
+    <div class="field"><label for="fFantasia">Nome fantasia <span class="opt">(como o cliente conhece)</span></label>
+      <input type="text" id="fFantasia" placeholder="Ex.: Virtus Construções"></div>
+    <div class="field"><label for="fCnpj">CNPJ</label>
+      <input type="tel" id="fCnpj" class="num" data-req data-mask="cnpj" inputmode="numeric" maxlength="18" placeholder="00.000.000/0000-00">
+      <div class="msg-err">CNPJ inválido.</div></div>
+    <div class="row">
+      <div class="field"><label for="fCidade">Cidade de atuação</label>
+        <input type="text" id="fCidade" data-req placeholder="Ex.: Tobias Barreto">
+        <div class="msg-err">Campo obrigatório.</div></div>
+      <div class="field"><label for="fUf">Estado</label>
+        <select id="fUf" data-req>
+          <option value="">Selecione</option>
+          <option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option>
+          <option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option>
+          <option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option>
+          <option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+          <option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option>
+          <option>SE</option><option>TO</option>
+        </select>
+        <div class="msg-err">Selecione o estado.</div></div>
+    </div>
+    <div class="field"><label for="fNome">Nome do responsável pela empresa</label>
+      <input type="text" id="fNome" data-req placeholder="Sócio ou proprietário" autocomplete="name">
+      <div class="msg-err">Campo obrigatório.</div></div>
+    <div class="field"><label for="fWhats">WhatsApp principal de contato</label>
+      <input type="tel" id="fWhats" class="num" data-req data-mask="tel" inputmode="numeric" maxlength="15" placeholder="(79) 90000-0000">
+      <div class="msg-err">Informe um número com DDD.</div></div>
+    <div class="field"><label for="fEmail">E-mail <span class="opt">(para contrato e notas)</span></label>
+      <input type="email" id="fEmail" data-req data-type="email" placeholder="nome@empresa.com.br" autocomplete="email">
+      <div class="msg-err">E-mail inválido.</div></div>
+  </section>
+
+  <!-- 2. PESSOAS -->
+  <section class="step" data-step="1" hidden>
+    <div class="eyebrow">Etapa 2 — Quem faz acontecer</div>
+    <h2 class="title">As três pessoas-chave</h2>
+    <p class="sub">A implantação trava quando falta gente definida. Precisamos de nome e número de cada função — pode ser a mesma pessoa em mais de uma.</p>
+    <div class="info"><span class="tag">Por que pedimos</span>
+      <p>Nossa equipe fala direto com essas pessoas no dia a dia. Sem isso, cada dúvida vira uma fila esperando você responder.</p></div>
+    <div class="field"><label for="fImpNome">Responsável pela implantação do sistema</label>
+      <input type="text" id="fImpNome" data-req placeholder="Nome de quem vai receber o treinamento">
+      <div class="msg-err">Campo obrigatório.</div></div>
+    <div class="field"><label for="fImpTel">WhatsApp do responsável pela implantação</label>
+      <input type="tel" id="fImpTel" class="num" data-req data-mask="tel" inputmode="numeric" maxlength="15" placeholder="(79) 90000-0000">
+      <div class="msg-err">Informe um número com DDD.</div></div>
+    <div class="field"><label for="fVidNome">Responsável por gravar os vídeos</label>
+      <input type="text" id="fVidNome" data-req placeholder="Quem aparece / grava as obras">
+      <div class="msg-err">Campo obrigatório.</div></div>
+    <div class="field"><label for="fVidTel">WhatsApp de quem grava</label>
+      <input type="tel" id="fVidTel" class="num" data-req data-mask="tel" inputmode="numeric" maxlength="15" placeholder="(79) 90000-0000">
+      <div class="hint">Enviamos os roteiros semanais direto para esse número.</div>
+      <div class="msg-err">Informe um número com DDD.</div></div>
+    <div class="field"><label for="fCorrNome">Correspondente Caixa da sua cidade</label>
+      <input type="text" id="fCorrNome" data-req placeholder="Nome do correspondente ou da empresa">
+      <div class="msg-err">Campo obrigatório.</div></div>
+    <div class="field"><label for="fCorrTel">WhatsApp do correspondente</label>
+      <input type="tel" id="fCorrTel" class="num" data-req data-mask="tel" inputmode="numeric" maxlength="15" placeholder="(79) 90000-0000">
+      <div class="msg-err">Informe um número com DDD.</div></div>
+    <div class="field"><label for="fCorrRel">Você já trabalha com esse correspondente?</label>
+      <select id="fCorrRel" data-req>
+        <option value="">Selecione</option>
+        <option>Sim, é o parceiro fixo da construtora</option>
+        <option>Sim, mas uso mais de um</option>
+        <option>Não, é só um contato conhecido</option>
+        <option>Ainda não tenho correspondente definido</option>
+      </select>
+      <div class="msg-err">Selecione uma opção.</div></div>
+  </section>
+
+  <!-- 3. MARKETING -->
+  <section class="step" data-step="2" hidden>
+    <div class="eyebrow">Etapa 3 — Marketing</div>
+    <h2 class="title">Perfis e acessos</h2>
+    <p class="sub">Precisamos publicar e anunciar em nome da sua construtora. Isso exige acesso — mas existe um jeito certo e um jeito errado de dar esse acesso.</p>
+    <div class="field"><label for="fInsta">@ do Instagram da construtora</label>
+      <input type="text" id="fInsta" data-req placeholder="@suaconstrutora" autocapitalize="none">
+      <div class="msg-err">Campo obrigatório.</div></div>
+    <div class="field"><label for="fSeg">Seguidores hoje</label>
+      <input type="tel" id="fSeg" class="num" data-req data-mask="int" inputmode="numeric" placeholder="Ex.: 3.240">
+      <div class="hint">Número aproximado já serve. É a linha de partida para medirmos o crescimento.</div>
+      <div class="msg-err">Informe o número de seguidores.</div></div>
+    <div class="info warn"><span class="tag">Leia antes de preencher a senha</span>
+      <p>A forma <strong>segura</strong> de nos dar acesso é pelo Meta Business Suite: você continua dono do perfil e nos adiciona como parceiro, com permissão que pode ser removida a qualquer momento. Enviamos o passo a passo depois deste formulário.</p>
+      <p>Se preferir entregar login e senha mesmo assim, os campos abaixo são opcionais. Recomendação: <strong>troque a senha</strong> para uma provisória antes de enviar e ative a verificação em duas etapas depois.</p></div>
+    <div class="field"><label for="fInstaUser">Usuário do Instagram <span class="opt">(opcional)</span></label>
+      <input type="text" id="fInstaUser" placeholder="login de acesso" autocapitalize="none" autocomplete="off"></div>
+    <div class="field"><label for="fInstaPass">Senha provisória <span class="opt">(opcional)</span></label>
+      <input type="password" id="fInstaPass" placeholder="deixe em branco se preferir o acesso por parceria" autocomplete="off">
+      <div class="hint">Este campo não é salvo em rascunho. Só é enviado quando você conclui o formulário.</div></div>
+    <div class="field"><label for="fGerAnuncio">Já anuncia hoje?</label>
+      <select id="fGerAnuncio" data-req>
+        <option value="">Selecione</option>
+        <option>Nunca anunciei</option>
+        <option>Já impulsionei posts pelo celular</option>
+        <option>Tenho Gerenciador de Anúncios e já rodei campanhas</option>
+        <option>Tenho agência ou gestor de tráfego hoje</option>
+      </select>
+      <div class="msg-err">Selecione uma opção.</div></div>
+  </section>
+
+  <!-- 4. NÚMEROS -->
+  <section class="step" data-step="3" hidden>
+    <div class="eyebrow">Etapa 4 — Linha de base</div>
+    <h2 class="title">Seus números hoje</h2>
+    <p class="sub">Sem esses números não existe meta, não existe medição e não existe como provar o resultado depois. Pode ser aproximado — mas precisa ser real.</p>
+    <div class="row">
+      <div class="field"><label for="fCasas25">Casas vendidas em 2025</label>
+        <input type="tel" id="fCasas25" class="num" data-req data-mask="int" inputmode="numeric" placeholder="Ex.: 24">
+        <div class="msg-err">Obrigatório.</div></div>
+      <div class="field"><label for="fCasas26">Casas vendidas em 2026 até agora</label>
+        <input type="tel" id="fCasas26" class="num" data-req data-mask="int" inputmode="numeric" placeholder="Ex.: 11">
+        <div class="msg-err">Obrigatório.</div></div>
+    </div>
+    <div class="field"><label for="fFat25">Faturamento bruto de 2025</label>
+      <input type="tel" id="fFat25" class="num" data-req data-mask="brl" inputmode="numeric" placeholder="R$ 0">
+      <div class="msg-err">Obrigatório.</div></div>
+    <div class="field"><label for="fFat26">Faturamento bruto de 2026 até agora</label>
+      <input type="tel" id="fFat26" class="num" data-req data-mask="brl" inputmode="numeric" placeholder="R$ 0">
+      <div class="msg-err">Obrigatório.</div></div>
+    <div class="calc">
+      <div class="lbl">Ticket médio por casa em 2025</div>
+      <div class="big" id="outTicket">—</div>
+      <div class="hint" style="margin-top:8px">Calculado a partir dos números acima. É essa a base que transforma meta em dinheiro na próxima etapa.</div>
+    </div>
+    <div class="field" style="margin-top:20px"><label for="fEstoque">Unidades disponíveis para venda agora</label>
+      <input type="tel" id="fEstoque" class="num" data-req data-mask="int" inputmode="numeric" placeholder="Ex.: 40">
+      <div class="hint">Inclui o que está pronto, em obra e em lançamento.</div>
+      <div class="msg-err">Obrigatório.</div></div>
+  </section>
+
+  <!-- 5. META -->
+  <section class="step" data-step="4" hidden>
+    <div class="eyebrow">Etapa 5 — O alvo</div>
+    <h2 class="title">Quanto você quer crescer</h2>
+    <p class="sub">Escolha o percentual de faturamento a mais que você espera com a GRM, comparado a 2025. Arraste para ver o que isso significa em dinheiro e em casas.</p>
+    <div class="chips" id="chips">
+      <button type="button" class="chip" data-v="5">5%</button>
+      <button type="button" class="chip" data-v="10">10%</button>
+      <button type="button" class="chip" data-v="20">20%</button>
+      <button type="button" class="chip" data-v="50">50%</button>
+      <button type="button" class="chip" data-v="100">100%</button>
+    </div>
+    <input type="range" id="fMeta" min="1" max="100" step="1" value="10" aria-label="Percentual de crescimento esperado">
+    <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono';font-size:11px;color:var(--txt-3);margin-top:-4px"><span>1%</span><span>100%</span></div>
+    <div class="calc">
+      <div class="lbl">Crescimento escolhido</div>
+      <div class="big"><span id="outPct">10</span>%</div>
+      <hr>
+      <div class="gr">
+        <div><div class="lbl">Faturamento a mais</div><div class="v" id="outDelta">—</div></div>
+        <div><div class="lbl">Casas a mais no ano</div><div class="v" id="outCasas">—</div></div>
+        <div><div class="lbl">Base 2025</div><div class="v" id="outBase">—</div></div>
+        <div><div class="lbl">Alvo total do ano</div><div class="v" id="outAlvo">—</div></div>
+      </div>
+      <hr>
+      <div class="hint" id="outFrase" style="margin:0">Preencha os números da etapa anterior para ver a conta.</div>
+    </div>
+    <div class="info" style="margin-top:22px"><span class="tag">Referência de mercado</span>
+      <p>Uma construtora de MCMV cresce, em média, de <strong>3% a 5% ao ano</strong> sem mudar nada na forma de vender. Meta abaixo disso não justifica contratar ninguém. Meta muito acima exige estoque, obra e capital de giro para acompanhar.</p></div>
+    <div class="field" style="margin-top:20px">
+      <label for="fMin">Se não chegarmos no número acima, qual crescimento você considera um bom resultado?</label>
+      <select id="fMin" data-req>
+        <option value="">Selecione</option>
+        <option value="3">3% — empatar com o crescimento natural do mercado</option>
+        <option value="5">5% — um pouco acima do que aconteceria sozinho</option>
+        <option value="8">8%</option><option value="10">10%</option><option value="15">15%</option>
+        <option value="20">20%</option><option value="30">30% ou mais</option>
+      </select>
+      <div class="hint" id="outMin">Esse é o piso que vamos combinar por escrito. Seja honesto aqui: é o número que define se a parceria valeu ou não.</div>
+      <div class="msg-err">Selecione uma opção.</div></div>
+  </section>
+
+  <!-- 6. PLANO E TERMOS -->
+  <section class="step" data-step="5" hidden>
+    <div class="eyebrow">Etapa 6 — Regras do jogo</div>
+    <h2 class="title">Seu plano e as condições</h2>
+    <p class="sub">Leia com calma. Nada aqui é letra miúda — é exatamente o que vai estar no contrato.</p>
+
+    <div class="info"><span class="tag">Os primeiros 60 dias</span>
+      <p>Nos planos com comissão, <strong>a GRM banca a verba de anúncios durante os primeiros 60 dias</strong>. Você não coloca dinheiro em tráfego nesse período — paga apenas o valor fixo mensal.</p>
+      <p>Se em 60 dias corridos você não fechar <strong>nenhuma venda</strong> originada por lead entregue pela GRM, devolvemos integralmente o valor fixo pago no período.</p>
+      <ul>
+        <li>A garantia depende de você cumprir sua parte: enviar os vídeos solicitados, responder os leads no prazo combinado e manter estoque disponível para venda.</li>
+        <li>O pedido de devolução deve ser feito por escrito em até 15 dias após o fim do período.</li>
+        <li>Depois dos 60 dias, a verba de anúncios passa a ser definida em conjunto e paga por você diretamente às plataformas.</li>
+      </ul></div>
+
+    <div class="info"><span class="tag">Escolha seu plano</span>
+      <p>Os dois primeiros incluem marketing feito e pago pela GRM nos 60 dias iniciais. A diferença está em quem conduz a venda até a assinatura.</p></div>
+
+    <label class="pick">
+      <input type="radio" name="modelo" value="3% — Entregamos o lead, sua equipe fecha">
+      <div class="box">
+        <div class="pct">3%</div>
+        <div class="fixo">+ R$ 97/mês fixo</div>
+        <div class="nm">Você fecha a venda</div>
+        <div class="ds">Fazemos o marketing, bancamos os anúncios nos primeiros 60 dias, captamos e qualificamos o lead — e entregamos para o seu corretor. Sua equipe conduz atendimento, documentação e assinatura com o correspondente.</div>
+      </div>
+      <span class="mark"></span>
+    </label>
+
+    <label class="pick">
+      <input type="radio" name="modelo" value="4% — GRM conduz do lead ao contrato">
+      <div class="box">
+        <div class="pct">4%</div>
+        <div class="fixo">+ R$ 97/mês fixo</div>
+        <div class="nm">A GRM fecha na sua cidade</div>
+        <div class="ds">Assumimos o processo inteiro: marketing, qualificação, atendimento e condução do cliente até o contrato assinado com o correspondente Caixa. Você recebe a venda pronta.</div>
+      </div>
+      <span class="mark"></span>
+    </label>
+
+    <label class="pick">
+      <input type="radio" name="modelo" value="Sistema — apenas a plataforma, sem comissão">
+      <div class="box">
+        <div class="pct" style="font-size:25px">R$ 197</div>
+        <div class="fixo">por mês · sem comissão</div>
+        <div class="nm">Só o sistema</div>
+        <div class="ds">Acesso à plataforma da GRM para você operar por conta própria. Sem marketing, sem verba de anúncios da GRM, sem captação de leads e sem comissão sobre vendas.</div>
+      </div>
+      <span class="mark"></span>
+    </label>
+    <div class="msg-err" id="errModelo">Escolha um dos planos.</div>
+
+    <div class="info warn" id="avisoUf" style="display:none">
+      <span class="tag">Atenção ao seu estado</span>
+      <p>A intermediação completa (4%) é feita sob registro CRECI, que é estadual. Fora de Sergipe, esse plano depende de registro de filial no seu estado. Nossa equipe confirma a disponibilidade antes da assinatura — se não for possível, você segue no plano de 3% sem prejuízo.</p>
+    </div>
+
+    <div style="margin-top:22px">
+      <label class="check"><input type="checkbox" id="ck1"><span>Li e entendi as condições dos primeiros 60 dias e da devolução do valor fixo.</span></label>
+      <label class="check"><input type="checkbox" id="ck2"><span>Entendi o plano que escolhi, a comissão correspondente e o valor fixo mensal.</span></label>
+      <label class="check"><input type="checkbox" id="ck3"><span>Os números que informei sobre vendas e faturamento são reais, e autorizo a GRM a usá-los para montar a meta e as campanhas.</span></label>
+      <label class="check"><input type="checkbox" id="ck4"><span>Autorizo o tratamento dos meus dados pela GRM para execução deste serviço, conforme a LGPD. Posso pedir correção ou exclusão a qualquer momento.</span></label>
+      <div class="msg-err" id="errChecks">Marque as quatro confirmações para continuar.</div>
+    </div>
+  </section>
+
+  <!-- 7. REVISÃO -->
+  <section class="step" data-step="6" hidden>
+    <div class="eyebrow">Etapa 7 — Conferência</div>
+    <h2 class="title">Revise antes de enviar</h2>
+    <p class="sub">Toque em "Editar" em qualquer bloco para voltar e corrigir.</p>
+    <div id="revBox"></div>
+    <div class="field" style="margin-top:6px">
+      <label for="fObs">Algo que a gente precisa saber e não perguntou? <span class="opt">(opcional)</span></label>
+      <textarea id="fObs" rows="3" placeholder="Escreva aqui"></textarea>
+    </div>
+    <div class="msg-err" id="errEnvio" style="margin-top:10px">Não conseguimos enviar agora. Verifique a conexão e toque em Enviar de novo.</div>
+  </section>
+
+</div></div>
+</main>
+
+<!-- ==================== SUCESSO ==================== -->
+<section class="screen" id="scDone">
+  <div class="wrap done">
+    <div class="ring">✓</div>
+    <h2 class="title">Ficha enviada</h2>
+    <p class="sub" style="margin-top:10px">Nossa equipe revisa em até 1 dia útil e entra em contato pelo WhatsApp principal com o passo a passo do acesso ao Meta Business Suite.</p>
+    <div class="pill" id="protocolo"></div>
+  </div>
+</section>
+
+<div class="nav" id="nav" style="display:none">
+  <div class="nav-in">
+    <button class="btn btn-s" id="btnBack" type="button">Voltar</button>
+    <button class="btn btn-p" id="btnNext" type="button">Continuar</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIGURAÇÃO
+   Cole abaixo a URL do Apps Script publicado (termina em /exec)
+   ============================================================ */
+window.GRM_CONFIG = {
+  ENDPOINT: 'COLE_AQUI_A_URL_DO_APPS_SCRIPT',
+  ORIGEM: 'onboarding-cliente',
+  VERSAO: 'v2'
+};
+
+var $  = function(s,c){return (c||document).querySelector(s)};
+var $$ = function(s,c){return Array.prototype.slice.call((c||document).querySelectorAll(s))};
+var onlyDigits = function(v){return (v||'').replace(/\D/g,'')};
+
+function brl(n){ return isFinite(n) ? 'R$ ' + Math.round(n).toLocaleString('pt-BR') : '—' }
+function brlCurto(n){
+  if(!isFinite(n)) return '—';
+  if(n>=1e6) return 'R$ ' + (n/1e6).toLocaleString('pt-BR',{maximumFractionDigits:1}) + ' mi';
+  if(n>=1e3) return 'R$ ' + Math.round(n/1e3).toLocaleString('pt-BR') + ' mil';
+  return brl(n);
+}
+function maskCnpj(v){
+  v = onlyDigits(v).slice(0,14);
+  return v.replace(/^(\d{2})(\d)/,'$1.$2').replace(/^(\d{2})\.(\d{3})(\d)/,'$1.$2.$3')
+          .replace(/\.(\d{3})(\d)/,'.$1/$2').replace(/(\d{4})(\d)/,'$1-$2');
+}
+function maskTel(v){
+  v = onlyDigits(v).slice(0,11);
+  if(v.length<=10) return v.replace(/^(\d{2})(\d)/,'($1) $2').replace(/(\d{4})(\d)/,'$1-$2');
+  return v.replace(/^(\d{2})(\d)/,'($1) $2').replace(/(\d{5})(\d)/,'$1-$2');
+}
+function maskInt(v){ var d = onlyDigits(v); return d ? parseInt(d,10).toLocaleString('pt-BR') : '' }
+function maskBrl(v){ var d = onlyDigits(v); return d ? 'R$ ' + parseInt(d,10).toLocaleString('pt-BR') : '' }
+function validaCnpj(v){
+  var c = onlyDigits(v);
+  if(c.length!==14 || /^(\d)\1+$/.test(c)) return false;
+  var calc = function(len){ var s=0,p=len-7;
+    for(var i=0;i<len;i++){ s+=parseInt(c[i],10)*p--; if(p<2)p=9 }
+    var r=s%11; return r<2?0:11-r; };
+  return calc(12)===parseInt(c[12],10) && calc(13)===parseInt(c[13],10);
+}
+function num(id){ return parseInt(onlyDigits($(id).value)||'0',10) }
+
+/* ---------- rascunho local (espelho do servidor) ---------- */
+var Draft = (function(){
+  var mem = {};
+  function key(c){ return 'grm_onb_' + onlyDigits(c) }
+  return {
+    save:function(c,o){ try{ localStorage.setItem(key(c), JSON.stringify(o)) }catch(e){ mem[key(c)] = JSON.stringify(o) } },
+    load:function(c){
+      var raw = null;
+      try{ raw = localStorage.getItem(key(c)) }catch(e){}
+      if(!raw) raw = mem[key(c)];
+      try{ return raw ? JSON.parse(raw) : null }catch(e){ return null }
+    }
+  };
+})();
+
+var SESSAO = { cnpj:'', senhaHash:'', id:'' };
+
+async function sha256(t){
+  try{
+    var b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t));
+    return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('');
+  }catch(e){ return 'nohash:' + btoa(unescape(encodeURIComponent(t))) }
+}
+function endpointOk(){ var u = window.GRM_CONFIG.ENDPOINT; return u && u.indexOf('http')===0 }
+
+/* JSONP: o Apps Script não envia cabeçalho CORS em GET */
+function jsonp(url, cb){
+  if(!endpointOk()) return cb(null);
+  var nome = '__grmcb' + Date.now();
+  var s = document.createElement('script');
+  var t = setTimeout(function(){ limpa(); cb(null) }, 9000);
+  function limpa(){ clearTimeout(t); try{ delete window[nome] }catch(e){} if(s.parentNode) s.parentNode.removeChild(s) }
+  window[nome] = function(d){ limpa(); cb(d) };
+  s.onerror = function(){ limpa(); cb(null) };
+  s.src = url + '&callback=' + nome;
+  document.body.appendChild(s);
+}
+
+/* ============================================================ LOGIN */
+var modo = 'new';
+$$('.tabs button').forEach(function(b){
+  b.addEventListener('click',function(){
+    $$('.tabs button').forEach(function(x){x.classList.remove('on')});
+    b.classList.add('on'); modo = b.dataset.tab;
+    $('#lbPass').textContent = modo==='new' ? 'Crie uma senha' : 'Sua senha';
+    $('#hintPass').textContent = modo==='new'
+      ? 'Use o CNPJ + esta senha para voltar e ajustar as respostas em qualquer aparelho.'
+      : 'Informe a senha criada no primeiro acesso.';
+    $('#btnLogin').textContent = modo==='new' ? 'Começar' : 'Continuar preenchimento';
+  });
+});
+$('#lgCnpj').addEventListener('input',function(e){ e.target.value = maskCnpj(e.target.value) });
+
+$('#btnLogin').addEventListener('click',async function(){
+  var btn = this, cnpj = $('#lgCnpj').value, pass = $('#lgPass').value;
+  var ok = validaCnpj(cnpj), okp = pass.length>=6;
+  $('#errCnpj').classList.toggle('on',!ok); $('#lgCnpj').classList.toggle('err',!ok);
+  $('#errPass').textContent = 'Senha muito curta.';
+  $('#errPass').classList.toggle('on',!okp); $('#lgPass').classList.toggle('err',!okp);
+  if(!ok || !okp) return;
+
+  btn.disabled = true; btn.textContent = 'Verificando...';
+  SESSAO.cnpj = cnpj;
+  SESSAO.senhaHash = await sha256(onlyDigits(cnpj) + '::' + pass);
+  SESSAO.id = 'ONB-' + onlyDigits(cnpj).slice(0,8) + '-' + Date.now().toString(36).toUpperCase();
+
+  var url = window.GRM_CONFIG.ENDPOINT + '?action=load&cnpj=' + onlyDigits(cnpj) + '&hash=' + SESSAO.senhaHash;
+  jsonp(url, function(res){
+    var local = Draft.load(cnpj), fonte = null;
+    if(res && res.ok) fonte = res;
+    else if(local && local.senhaHash === SESSAO.senhaHash) fonte = { passo:local.passo, dados:local.dados, id:local.id };
+
+    if(modo==='back' && !fonte){
+      btn.disabled = false; btn.textContent = 'Continuar preenchimento';
+      $('#errPass').textContent = (res && res.erro==='senha')
+        ? 'Senha incorreta para este CNPJ.'
+        : 'Não encontramos um preenchimento em andamento para este CNPJ. Use "Primeiro acesso".';
+      $('#errPass').classList.add('on');
+      return;
+    }
+    if(fonte){ restaurar(fonte.dados); if(fonte.id) SESSAO.id = fonte.id }
+    else { $('#fCnpj').value = cnpj }
+
+    $('#scLogin').classList.remove('on');
+    $('#scForm').classList.add('on');
+    $('#topbar').style.display = 'block';
+    $('#nav').style.display = 'block';
+    irPara(fonte && modo==='back' ? (fonte.passo||0) : 0);
+  });
+});
+
+/* ============================================================ MÁSCARAS */
+$$('[data-mask]').forEach(function(el){
+  el.addEventListener('input',function(){
+    var t = el.dataset.mask;
+    el.value = t==='cnpj'?maskCnpj(el.value) : t==='tel'?maskTel(el.value) : t==='int'?maskInt(el.value) : maskBrl(el.value);
+    if(t==='int'||t==='brl') calcBase();
+  });
+});
+
+/* ============================================================ LOGO */
+var logoData = null;
+$('#dropLogo').addEventListener('click',function(){ $('#fileLogo').click() });
+$('#fileLogo').addEventListener('change',function(e){
+  var f = e.target.files[0]; if(!f) return;
+  if(f.size > 3*1024*1024){ alert('Arquivo acima de 3 MB. Envie uma versão menor ou mande depois pelo WhatsApp.'); return }
+  var r = new FileReader();
+  r.onload = function(){
+    logoData = r.result;
+    $('#logoImg').src = logoData;
+    $('#logoName').textContent = f.name;
+    $('#logoSize').textContent = Math.round(f.size/1024) + ' KB';
+    $('#logoPrev').classList.add('on');
+    $('#dropLogo').style.display = 'none';
+  };
+  r.readAsDataURL(f);
+});
+$('#logoDel').addEventListener('click',function(){
+  logoData = null; $('#fileLogo').value = '';
+  $('#logoPrev').classList.remove('on'); $('#dropLogo').style.display = 'block';
+});
+
+/* ============================================================ CÁLCULOS */
+function calcBase(){
+  var fat = num('#fFat25'), casas = num('#fCasas25');
+  var ticket = (fat>0 && casas>0) ? fat/casas : 0;
+  $('#outTicket').textContent = ticket>0 ? brl(ticket) : '—';
+  calcMeta();
+  return ticket;
+}
+function calcMeta(){
+  var pct = parseInt($('#fMeta').value,10), fat = num('#fFat25'), casas = num('#fCasas25');
+  var ticket = (fat>0 && casas>0) ? fat/casas : 0;
+  $('#outPct').textContent = pct;
+  $('#fMeta').style.setProperty('--fill', pct + '%');
+  $$('#chips .chip').forEach(function(c){ c.classList.toggle('on', parseInt(c.dataset.v,10)===pct) });
+  if(fat<=0){
+    ['#outDelta','#outCasas','#outBase','#outAlvo'].forEach(function(i){ $(i).textContent = '—' });
+    $('#outFrase').textContent = 'Preencha o faturamento de 2025 na etapa anterior para ver a conta.';
+    return;
+  }
+  var delta = fat*pct/100, alvo = fat+delta, casasMais = ticket>0 ? Math.ceil(delta/ticket) : 0;
+  $('#outDelta').textContent = brlCurto(delta);
+  $('#outBase').textContent  = brlCurto(fat);
+  $('#outAlvo').textContent  = brlCurto(alvo);
+  $('#outCasas').textContent = casasMais>0 ? ('+' + casasMais) : '—';
+  var frase = 'Crescer ' + pct + '% significa faturar ' + brl(delta) + ' a mais do que em 2025, chegando a ' + brl(alvo) + ' no ano.';
+  if(casasMais>0) frase += ' Com o seu ticket médio de ' + brl(ticket) + ', são cerca de ' + casasMais + ' casa' + (casasMais>1?'s':'') + ' a mais — ' + (casas+casasMais) + ' no total.';
+  if(pct<=5) frase += ' Atenção: essa é a faixa que o mercado cresce sozinho, sem contratar ninguém.';
+  $('#outFrase').textContent = frase;
+}
+$('#fMeta').addEventListener('input',calcMeta);
+$$('#chips .chip').forEach(function(c){ c.addEventListener('click',function(){ $('#fMeta').value = c.dataset.v; calcMeta() }) });
+$('#fMin').addEventListener('change',function(){
+  var p = parseInt(this.value,10), fat = num('#fFat25');
+  if(!p) return;
+  var base = 'Esse é o piso que vamos combinar por escrito.';
+  $('#outMin').textContent = fat>0 ? base + ' ' + p + '% sobre 2025 equivale a ' + brl(fat*p/100) + ' a mais no ano.' : base;
+});
+
+/* ============================================================ NAVEGAÇÃO */
+var passo = 0, steps = $$('.step'), TOTAL = steps.length;
+function irPara(n){
+  passo = Math.max(0, Math.min(TOTAL-1, n));
+  steps.forEach(function(s,i){ s.hidden = (i!==passo) });
+  $('#barFill').style.width = ((passo+1)/TOTAL*100) + '%';
+  $('#stepCount').textContent = String(passo+1).padStart(2,'0') + ' / ' + String(TOTAL).padStart(2,'0');
+  $('#btnBack').style.display = passo===0 ? 'none' : 'block';
+  $('#btnNext').textContent = passo===TOTAL-1 ? 'Enviar ficha' : 'Continuar';
+  if(passo===4) calcMeta();
+  if(passo===5) $('#avisoUf').style.display = ($('#fUf').value && $('#fUf').value!=='SE') ? 'block' : 'none';
+  if(passo===TOTAL-1) montarRevisao();
+  window.scrollTo({top:0,behavior:'smooth'});
+  salvarRascunho();
+}
+function validaPasso(){
+  var sec = steps[passo], ok = true;
+  $$('[data-req]',sec).forEach(function(el){
+    var v = el.value.trim(), bad = !v;
+    if(!bad && el.dataset.mask==='cnpj') bad = !validaCnpj(v);
+    if(!bad && el.dataset.mask==='tel')  bad = onlyDigits(v).length<10;
+    if(!bad && el.dataset.type==='email')bad = !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+    el.classList.toggle('err',bad);
+    var m = el.parentNode.querySelector('.msg-err'); if(m) m.classList.toggle('on',bad);
+    if(bad && ok) el.scrollIntoView({block:'center',behavior:'smooth'});
+    if(bad) ok = false;
+  });
+  if(passo===5){
+    var mod = $('input[name=modelo]:checked');
+    $('#errModelo').classList.toggle('on',!mod); if(!mod) ok = false;
+    var cks = ['#ck1','#ck2','#ck3','#ck4'].every(function(i){ return $(i).checked });
+    $('#errChecks').classList.toggle('on',!cks); if(!cks) ok = false;
+  }
+  return ok;
+}
+$('#btnBack').addEventListener('click',function(){ irPara(passo-1) });
+$('#btnNext').addEventListener('click',function(){
+  if(!validaPasso()) return;
+  if(passo===TOTAL-1){ enviar(); return }
+  irPara(passo+1);
+});
+
+/* ============================================================ DADOS */
+var CAMPOS = ['fRazao','fFantasia','fCnpj','fCidade','fUf','fNome','fWhats','fEmail',
+  'fImpNome','fImpTel','fVidNome','fVidTel','fCorrNome','fCorrTel','fCorrRel',
+  'fInsta','fSeg','fInstaUser','fGerAnuncio',
+  'fCasas25','fCasas26','fFat25','fFat26','fEstoque','fMeta','fMin','fObs'];
+
+function coletar(){
+  var o = {};
+  CAMPOS.forEach(function(id){ var el = $('#'+id); if(el) o[id] = el.value });
+  var mod = $('input[name=modelo]:checked');
+  o.modelo = mod ? mod.value : '';
+  o.aceites = ['#ck1','#ck2','#ck3','#ck4'].map(function(i){ return $(i).checked });
+  return o;
+}
+function restaurar(o){
+  if(!o) return;
+  CAMPOS.forEach(function(id){ var el = $('#'+id); if(el && o[id]!==undefined) el.value = o[id] });
+  if(o.modelo) $$('input[name=modelo]').forEach(function(r){ r.checked = (r.value===o.modelo) });
+  if(o.aceites) ['#ck1','#ck2','#ck3','#ck4'].forEach(function(i,k){ $(i).checked = !!o.aceites[k] });
+  calcBase();
+}
+function post(body){
+  if(!endpointOk()){ console.log('[GRM] ENDPOINT não configurado:', body); return Promise.resolve() }
+  return fetch(window.GRM_CONFIG.ENDPOINT,{
+    method:'POST', mode:'no-cors',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify(body)
+  });
+}
+function salvarRascunho(){
+  if(!SESSAO.cnpj) return;
+  var pacote = { id:SESSAO.id, senhaHash:SESSAO.senhaHash, passo:passo, dados:coletar(), ts:Date.now() };
+  Draft.save(SESSAO.cnpj, pacote);
+  post({ action:'draft', cnpj:SESSAO.cnpj, senha_hash:SESSAO.senhaHash, passo:passo, dados:pacote.dados }).catch(function(){});
+}
+document.addEventListener('input',function(){ clearTimeout(window._t); window._t = setTimeout(salvarRascunho,1200) });
+
+/* ============================================================ REVISÃO */
+var BLOCOS = [
+  {t:'A construtora', s:0, campos:[['Razão social','fRazao'],['Nome fantasia','fFantasia'],['CNPJ','fCnpj'],['Cidade','fCidade'],['Estado','fUf'],['Responsável','fNome'],['WhatsApp','fWhats'],['E-mail','fEmail']]},
+  {t:'Pessoas-chave', s:1, campos:[['Implantação','fImpNome'],['WhatsApp implantação','fImpTel'],['Grava vídeos','fVidNome'],['WhatsApp vídeos','fVidTel'],['Correspondente','fCorrNome'],['WhatsApp correspondente','fCorrTel'],['Relação','fCorrRel']]},
+  {t:'Marketing', s:2, campos:[['Instagram','fInsta'],['Seguidores','fSeg'],['Usuário informado','fInstaUser'],['Anúncios hoje','fGerAnuncio']]},
+  {t:'Números', s:3, campos:[['Casas 2025','fCasas25'],['Casas 2026','fCasas26'],['Faturamento 2025','fFat25'],['Faturamento 2026','fFat26'],['Estoque disponível','fEstoque']]},
+  {t:'Meta', s:4, campos:[['Crescimento esperado','fMeta','%'],['Resultado mínimo aceito','fMin','%']]}
+];
+function montarRevisao(){
+  var html = '';
+  BLOCOS.forEach(function(b){
+    html += '<div class="rev"><h3>'+b.t+'<button type="button" data-go="'+b.s+'">EDITAR</button></h3><dl>';
+    b.campos.forEach(function(c){
+      var v = ($('#'+c[1])||{}).value || '';
+      v = !v ? '—' : (c[2] ? v + c[2] : v);
+      html += '<div class="it"><dt>'+c[0]+'</dt><dd>'+v.replace(/</g,'&lt;')+'</dd></div>';
+    });
+    html += '</dl></div>';
+  });
+  var mod = $('input[name=modelo]:checked');
+  html += '<div class="rev"><h3>Plano contratado<button type="button" data-go="5">EDITAR</button></h3><dl>'+
+          '<div class="it"><dt>Plano</dt><dd>'+(mod?mod.value:'—')+'</dd></div>'+
+          '<div class="it"><dt>Valor fixo mensal</dt><dd>'+(mod?(mod.value.indexOf('Sistema')===0?'R$ 197/mês':'R$ 97/mês'):'—')+'</dd></div>'+
+          '<div class="it"><dt>Logo enviada</dt><dd>'+(logoData?'Sim':'Não')+'</dd></div></dl></div>';
+  $('#revBox').innerHTML = html;
+  $$('#revBox [data-go]').forEach(function(b){ b.addEventListener('click',function(){ irPara(parseInt(b.dataset.go,10)) }) });
+}
+
+/* ============================================================ ENVIO */
+function payload(){
+  var d = coletar(), fixo = (d.modelo.indexOf('Sistema')===0) ? 197 : 97;
+  return {
+    action:'submit',
+    onboarding_id: SESSAO.id, versao: window.GRM_CONFIG.VERSAO, origem: window.GRM_CONFIG.ORIGEM,
+    enviado_em: new Date().toISOString(), senha_hash: SESSAO.senhaHash,
+    razao_social: d.fRazao, nome_fantasia: d.fFantasia, cnpj: d.fCnpj,
+    cidade: d.fCidade, uf: d.fUf, responsavel: d.fNome, whatsapp: d.fWhats, email: d.fEmail,
+    plano: d.modelo, valor_fixo: fixo,
+    implantacao_nome: d.fImpNome, implantacao_tel: d.fImpTel,
+    video_nome: d.fVidNome, video_tel: d.fVidTel,
+    correspondente_nome: d.fCorrNome, correspondente_tel: d.fCorrTel, correspondente_relacao: d.fCorrRel,
+    instagram: d.fInsta, seguidores: onlyDigits(d.fSeg),
+    instagram_user: d.fInstaUser, instagram_pass: $('#fInstaPass').value,
+    anuncia_hoje: d.fGerAnuncio,
+    casas_2025: onlyDigits(d.fCasas25), casas_2026: onlyDigits(d.fCasas26),
+    faturamento_2025: onlyDigits(d.fFat25), faturamento_2026: onlyDigits(d.fFat26),
+    estoque: onlyDigits(d.fEstoque),
+    meta_pct: d.fMeta, minimo_pct: d.fMin,
+    aceite_garantia: d.aceites[0], aceite_modelo: d.aceites[1],
+    aceite_dados: d.aceites[2], aceite_lgpd: d.aceites[3],
+    logo_base64: logoData || '', observacoes: d.fObs,
+    user_agent: navigator.userAgent
+  };
+}
+function enviar(){
+  var btn = $('#btnNext');
+  $('#errEnvio').classList.remove('on');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  var body = payload();
+  var concluir = function(){
+    $('#protocolo').textContent = 'Protocolo ' + SESSAO.id;
+    $('#scForm').classList.remove('on'); $('#scDone').classList.add('on');
+    $('#nav').style.display = 'none'; $('#topbar').style.display = 'none';
+    window.scrollTo(0,0);
+  };
+  if(!endpointOk()){ console.log('[GRM] ENDPOINT não configurado. Payload:', body); concluir(); return }
+  post(body).then(concluir).catch(function(){
+    try{
+      navigator.sendBeacon(window.GRM_CONFIG.ENDPOINT, new Blob([JSON.stringify(body)],{type:'text/plain;charset=utf-8'}));
+      concluir();
+    }catch(e){
+      btn.disabled = false; btn.textContent = 'Enviar ficha';
+      $('#errEnvio').classList.add('on');
+    }
+  });
+}
+calcBase();
+</script>
+</body>
+</html>
